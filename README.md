@@ -25,8 +25,8 @@ General usage
 This library is used by default in the project templates provided by
 [Create Plume React Project](https://github.com/Coreoz/create-plume-react-project).
 Basic usage of the library can be found in:
-- The API client declaration: <https://github.com/Coreoz/create-plume-react-project/blob/master/templates/admin/src/lib/api/ApiHttpClient.ts>
-- An API client usage (here authentication): <https://github.com/Coreoz/create-plume-react-project/blob/master/templates/admin/src/lib/api/session/SessionApi.ts>
+- The API client declaration: <https://github.com/Coreoz/create-plume-react-project/blob/master/templates/admin/src/api/ApiHttpClient.ts>
+- An API client usage (here authentication): <https://github.com/Coreoz/create-plume-react-project/blob/master/templates/admin/src/api/session/SessionApi.ts>
 
 Main components example
 -----------------------
