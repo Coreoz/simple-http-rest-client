@@ -1,7 +1,7 @@
 {
   "name": "simple-http-rest-client",
   "version": "1.0.0-SNAPSHOT",
-  "description": "A framework for creating a REST HTTP client in TypeScript",
+  "description": "A lightweight framework for creating reliable REST HTTP clients in TypeScript",
   "author": "Aurélien Manteaux <amanteaux@coreoz.com> (https://coreoz.com)",
   "repository": "https://github.com/coreoz/simple-http-rest-client",
   "homepage": "https://github.com/coreoz/simple-http-rest-client",
