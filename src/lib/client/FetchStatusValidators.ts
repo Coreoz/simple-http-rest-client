@@ -9,6 +9,7 @@ const logger = new Logger('FetchStatusValidators');
  * - is 403: in that case returns a {@link forbiddenError}
  * - is 204: in that case returns a `null` {@link HttpResponse}
  */
+// eslint-disable-next-line import/prefer-default-export
 export const validateBasicStatusCodes: FetchResponseHandler = (response: Response) => {
   // if the error is a forbidden access, the body should be empty
   if (response.status === 403) {

@@ -54,7 +54,7 @@ export function isHttpError(object: unknown) {
   return object && typeof object === 'object' && (object as HttpError).errorCode !== undefined;
 }
 
-export function safeThen<P, R>(thenFunction: PromiseFunction<P, R>, debugContext?: object): PromiseFunction<P, R> {
+function safeThen<P, R>(thenFunction: PromiseFunction<P, R>, debugContext?: object): PromiseFunction<P, R> {
   return (parameter: P) => {
     try {
       return thenFunction(parameter);
@@ -71,7 +71,7 @@ export function safeThen<P, R>(thenFunction: PromiseFunction<P, R>, debugContext
   };
 }
 
-export function safeCatch<R>(catchFunction: PromiseFunction<HttpError, R>, debugContext?: object)
+function safeCatch<R>(catchFunction: PromiseFunction<HttpError, R>, debugContext?: object)
   : PromiseFunction<unknown, R> {
   return (httpError: unknown) => {
     if (isHttpError(httpError)) {
@@ -104,7 +104,7 @@ export function safeCatch<R>(catchFunction: PromiseFunction<HttpError, R>, debug
  *
  * It also contains a `debugContext` that is used for logging in case an error occurs.
  */
-export default class HttpPromise<T> {
+export class HttpPromise<T> {
   private isThenAttached: boolean;
 
   private isCaughtAttached: boolean;

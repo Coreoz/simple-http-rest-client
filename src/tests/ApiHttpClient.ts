@@ -1,7 +1,7 @@
 import { HttpRequest, HttpMethod } from 'simple-http-request-builder';
-import HttpPromise, { unwrapHttpPromise } from '../lib/plume-http/promise/HttpPromise';
-import defaultJsonFetchClient from '../lib/plume-http/client/JsonFetchClient';
-import fetchClient from '../lib/plume-http/client/FetchClient';
+import { unwrapHttpPromise, HttpPromise } from '../lib/promise/HttpPromise';
+import { defaultJsonFetchClient } from '../lib/client/JsonFetchClient';
+import { fetchClient } from '../lib/client/FetchClient';
 
 const baseUrl = '/api';
 

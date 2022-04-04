@@ -26,9 +26,22 @@ export {
   jsonContentTypeValidator,
   defaultJsonErrorMapper,
   toJsonResponse,
-  defaultJsonFetchClient
+  defaultJsonFetchClient,
 } from './lib/client/JsonFetchClient';
 export type {
   JsonErrorMapper,
 } from './lib/client/JsonFetchClient';
-// TODO finish exporting Promise
+// http promise
+export {
+  processHttpResponse,
+  unwrapHttpPromise,
+  isHttpError,
+  HttpPromise,
+} from './lib/promise/HttpPromise';
+export type {
+  PromiseFunction,
+} from './lib/promise/HttpPromise';
+// promise monitor
+export { PromiseMonitor } from './lib/promise/PromiseMonitor';
+// synchronized http promise
+export { SynchronizedHttpPromise } from './lib/promise/SynchronizedHttpPromise';

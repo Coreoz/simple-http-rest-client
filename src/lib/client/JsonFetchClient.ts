@@ -1,9 +1,9 @@
 import { Logger } from 'simple-logging-system';
 import { HttpRequest } from 'simple-http-request-builder';
 import { genericError, HttpResponse } from './HttpResponse';
-import fetchClient, { FetchResponseHandler } from './FetchClient';
-import validateBasicStatusCodes from './FetchStatusValidators';
-import contentTypeValidator from './ContentTypeValidator';
+import { fetchClient, FetchResponseHandler } from './FetchClient';
+import { validateBasicStatusCodes } from './FetchStatusValidators';
+import { contentTypeValidator } from './ContentTypeValidator';
 
 const logger = new Logger('JsonFetchClient');
 

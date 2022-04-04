@@ -1,10 +1,11 @@
-import HttpPromise from './HttpPromise';
+import { HttpPromise } from './HttpPromise';
 
 /**
  * Use a {@link HttpPromise} loader to make sure there is only one execution at a time.
  * See {@link SynchronizedHttpPromise.load}.
  */
-export default class SynchronizedHttpPromise<T> {
+// eslint-disable-next-line import/prefer-default-export
+export class SynchronizedHttpPromise<T> {
   private loadingPromise?: Promise<T>;
 
   private loadingContext?: object;
