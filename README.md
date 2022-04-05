@@ -2,11 +2,14 @@ Simple HTTP REST Client
 =======================
 This library provides a framework for creating a REST HTTP client in TypeScript and JavaScript.
 In other words, this library can be used to consume every type of API that uses the request/response pattern.
-But this library **should not be used** to consume websockets.
+But this library **should not be used** to consume websockets or GraphQL: workflows involved in these cases are specific, there is no point in trying to unite them with what is being done in this library.
 
 This library implements [Simple HTTP Request Builder](https://github.com/Coreoz/simple-http-request-builder) with [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch).
 
-Though this library works seamlessly with [Jersey module of Plume Framework](https://github.com/Coreoz/Plume/tree/master/plume-web-jersey), it can be easily adapted to work with any backend API.
+Though this library works seamlessly with [Jersey module of Plume Framework](https://github.com/Coreoz/Plume/tree/master/plume-web-jersey), it can be easily adapted to work with any HTTP API.
+
+This library is used by default in the project templates provided by
+[Create Plume React Project](https://github.com/Coreoz/create-plume-react-project).
 
 Installation
 ------------
@@ -20,22 +23,13 @@ Using Yarn:
 yarn add simple-http-request-builder
 ```
 
-General usage
--------------
-This library is used by default in the project templates provided by
-[Create Plume React Project](https://github.com/Coreoz/create-plume-react-project).
-Basic usage of the library can be found in:
-- The API client declaration: <https://github.com/Coreoz/create-plume-react-project/blob/master/templates/admin/src/api/ApiHttpClient.ts>
-- An API client usage (here authentication): <https://github.com/Coreoz/create-plume-react-project/blob/master/templates/admin/src/api/session/SessionApi.ts>
-
 Main components example
 -----------------------
-To consume an API, there is 3 steps:
-1. Configure the API client: this will build a request and with the attached HTTP client. The API client will generally be the same for all endpoints of the same host. More API clients may be needed to differentiate public and authenticated parts of the whole host API catalog.
-2. Configure each API endpoint
-3. Consume the API endpoint
+To consume an API, there are 3 main steps:
+1. [Configure the API client](#configure-the-api-client): this client will build a request and with the attached HTTP client. The API client will generally be the same for all endpoints of the same host. More API clients may be needed to differentiate public and authenticated parts of the whole host API catalog.
+2. [Configure each API endpoint](#configure-each-api-endpoint)
+3. [Consume the API endpoint](#consume-the-api-endpoint)
 
-Here are sample for these 3 steps:
 ### Configure the API client
 This function be called for each API endpoint identified by a Method and a Path.
 A request builder will be returned, when executed, this request will return a [HttpPromise<T>](#httppromise).
@@ -64,7 +58,7 @@ restRequest<T>(method: HttpMethod, path: string): HttpRequest<HttpPromise<T>> {
 Here the goal is to configure the specific API call to an endpoint. So the previous [API client](#configure-the-api-client) created will be used.
 
 In the following example:
-- The endpoint is `/admin/session` to authenticate a user by verifying its credentials
+- The endpoint path is `/admin/session` to authenticate a user by verifying its credentials
 - This endpoint takes a JSON object as a body argument that complies to the TS type `SessionCredentials`
 - This endpoint returns a JSON object that complies to the TS type `SessionToken`
 
@@ -95,8 +89,8 @@ authenticate(credentials: SessionCredentials) {
 }
 ```
 
-Main concepts
--------------
+Types and main concepts
+-----------------------
 Basic types are:
 - [HttpRequest](#httprequest): request configuration
 - [FetchResponseHandler](#fetchresponsehandler): raw `fetch` `Response` validation/transformation
@@ -107,15 +101,15 @@ On top of that, the [HttpPromise](#httppromise) is often used on a [HttpResponse
 - Make sure to have logs in case an error occurred even though a `catch` statement is not set
 
 ### HttpRequest
-It represents a request that will be executed by an HttpClient.
+It represents a request that will be executed by an [HttpClient](#configure-the-api-client).
 This is the main object defined in [Simple HTTP Request Builder](https://github.com/Coreoz/simple-http-request-builder).
-See directly the type source for documentation: <https://github.com/Coreoz/simple-http-request-builder/tree/master/src/lib/HttpRequest.ts>
+See directly the source type for advanced documentation: <https://github.com/Coreoz/simple-http-request-builder/tree/master/src/lib/HttpRequest.ts>
 
 ### HttpResponse
 This object represents the successful or failed HTTP response.
-It is returned by an HttpClient and by a [FetchResponseHandler](#fetchresponsehandler).
+It is returned by an [HttpClient](#configure-the-api-client) and by a [FetchResponseHandler](#fetchresponsehandler).
 HTTP failures are represented by an [error](#httperror).
-See directly the type source for documentation: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/client/HttpResponse.ts>
+See directly the source type for advanced documentation: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/client/HttpResponse.ts>
 
 ### FetchResponseHandler
 Handlers are executed after a successful HTTP response is available: this means an HTTP response has been received (whichever the response statut, 200, 400 or 500...).
@@ -124,12 +118,12 @@ These handlers will:
 - Return a result
 
 So a handler can:
-- Either return a result (which can be a successful result or an error), in that case following handlers **will not be executed**
-- Either return `undefined`, in that case following handlers **will be executed**
+- Either return a result (which can be a successful result or an error), in that case next handlers **will not be executed**
+- Either return `undefined`, in that case next handlers **will be executed**
 
 Expected results should be of type `Promise` of [HttpResponse](#httpresponse).
 
-Here are two sample usage:
+Here are two samples usage:
 - A handler that validate the HTTP status code: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/client/FetchStatusValidators.ts>
 - A handler that return a JSON results (the function is named `toJsonResponse`): <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/client/JsonFetchClient.ts>
 
@@ -140,21 +134,23 @@ A mutable safe `Promise` that ensures:
 - Then and Catch functions are wrapped to ensure that if an error occurs during the execution,
   an error statement is issued
 
-See directly the type source for documentation: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/promise/HttpPromise.ts>
+See directly the source type for advanced documentation: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/promise/HttpPromise.ts>
 
 ### HttpError
 Http errors can be:
-- Raised by the library, in that case the work will only be to if necessary display the correct error message
+- Raised by the library, in that case the work expected in a project will only be to display the correct error message to the end user if necessary
 - Raised by the project that configured the library to a specific API that raises its own errors
 
-See directly the type source for documentation: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/client/HttpResponse.ts>
+See directly the source type for advanced documentation: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/client/HttpResponse.ts>
 
 #### Errors raised by the library
 The errors handled by the library are:
 - **NETWORK_ERROR**: It means the remote API could not be contacted, it is likely due to poor network connection on the client side
 - **TIMEOUT_ERROR**: It means the remote API could be contact but no result has been returned after the timeout delay. It might also be due to poor network connection, but it can also be due to an API issue. The default timeout is 20 seconds, but that can be configured
-- **FORBIDDEN_ERROR**: It means the API returned a 403 response. This error is raised by the [validator](#TODO) `validateBasicStatusCodes`
-- **INTERNAL_ERROR**: It means a parsing error occurred: a `then` function provided to a `HttpPromise.then()` function raised an error, the parsing of the JSON object raised an error, the server returned a non JSON response, etc. Since this error is related to a developer error or a backend error, we generally want to display the same generic error to an end user. If this error is not suitable for a project, it is possible to get rid of this by having customized [validator](#TODO) and wrapping `then` and `catch` functions provided to [HttpPromise](#httppromise) to make sure these functions never fails or raised custom [HttpError](#httperror)
+- **FORBIDDEN_ERROR**: It means the API returned a 403 response. This error is raised by the [validator](#fetchresponsehandler) `validateBasicStatusCodes`
+- **INTERNAL_ERROR**: It means a parsing error occurred: a `then` function provided to a `HttpPromise.then()` function raised an error, the parsing of the JSON object raised an error, the server returned a non JSON response, etc. Since this error is related to a developer error or a backend error, we generally want to display the same generic error to an end user. If this error is not suitable for a project, it is possible to get rid of this by having customized [validator](#fetchresponsehandler) and wrapping `then` and `catch` functions provided to [HttpPromise](#httppromise) to make sure these functions never fails or raised custom [HttpError](#httperror)
+
+These errors are already mapped to default messages in the [Create Plume React Project](https://github.com/Coreoz/create-plume-react-project) templates: <https://github.com/Coreoz/create-plume-react-project/blob/master/templates/front/src/i18n/translations/en.ts>
 
 Step by step custom usage
 -------------------------
@@ -192,8 +188,8 @@ const apiFetchClient = <T>(httpRequest: HttpRequest<unknown>): Promise<HttpRespo
 The goal here is to parse the response's body and return the correct object. For example to parse a JSON content:
 1. The JSON body should be parsed (using `response.json()`)
 2. Depending on the status code:
-  1. If the status code is 2xx, the response object should be appended to the field `HttpResponse.response`
-  2. Else the response is an error, the error might be categorized, it should then be appended to the field `HttpResponse.error`
+   1. If the status code is 2xx, the response object should be appended to the field `HttpResponse.response`
+   2. Else the response is an error, the error might be categorized, it should then be appended to the field `HttpResponse.error`
 3. If the JSON parsing failed, an error should be to the field `HttpResponse.error`
 
 All these actions are implemented in the function `toJsonResponse(response: Response, jsonErrorMapper: JsonErrorMapper = defaultJsonErrorMapper): Promise<HttpResponse<unknown>>`:
