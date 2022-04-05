@@ -4,6 +4,11 @@ import { genericError, networkError, timeoutError } from '../lib/client/HttpResp
 import { fetchClient } from '../lib/client/FetchClient';
 import { unwrapHttpPromise } from '../lib/promise/HttpPromise';
 
+const waitTimeout = (durationInMillis: number) => new Promise(
+  // eslint-disable-next-line no-promise-executor-return
+  (resolve) => setTimeout(resolve, durationInMillis),
+);
+
 let mockedFetchResponseBody: string | undefined;
 const mockedFetchResponseStatus: ResponseInit = {
   status: 200,
@@ -45,6 +50,8 @@ describe('Tests fetch client', () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toEqual({ test: 1 });
+    // to avoid HttpPromise logging after the end of the jest test
+    await waitTimeout(1);
   });
 
   test('Check network error rejects promise with networkError', async () => {
@@ -64,6 +71,8 @@ describe('Tests fetch client', () => {
       .execute()
       .toPromise();
     await expect(response).rejects.toEqual(timeoutError);
+    // to avoid HttpPromise logging after the end of the jest test
+    await waitTimeout(1);
   });
 
   test('Check handler execution error rejects promise with genericError', async () => {
