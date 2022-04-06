@@ -15,12 +15,12 @@ Installation
 ------------
 Using NPM:
 ```
-npm install simple-http-request-builder
+npm install simple-http-rest-client
 ```
 
 Using Yarn:
 ```
-yarn add simple-http-request-builder
+yarn add simple-http-rest-client
 ```
 
 Main components example
