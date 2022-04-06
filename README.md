@@ -266,3 +266,10 @@ A use case is Server-Side-Rendering:
 - And when all promises have revolved, it is guessable that all the data are ready for the application to rerender again
 
 For more information, see the corresponding source code: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/promise/PromiseMonitor.ts>
+
+Tree shaking
+------------
+This library supports tree shaking: components from this library that are not used will not end in your final build as long as your bundler supports this feature.
+For example, if the component `SynchronizedHttpPromise` is not used, it will not be packaged in your final application build.
+
+[Vite](https://vitejs.dev/) is a great bundler to achieve this.
