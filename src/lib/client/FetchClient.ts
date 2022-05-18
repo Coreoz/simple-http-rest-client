@@ -1,5 +1,9 @@
 import { Logger } from 'simple-logging-system';
-import { HttpRequest, HttpClient } from 'simple-http-request-builder';
+import {
+  HttpRequest,
+  HttpClient,
+  HttpMethod
+} from 'simple-http-request-builder';
 import {
   genericError,
   HttpResponse,
@@ -7,6 +11,7 @@ import {
   networkError,
   timeoutError,
 } from './HttpResponse';
+import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
 
 const logger = new Logger('FetchClient');
 
@@ -113,3 +118,25 @@ export const fetchClient = <T = Response>(httpRequest: HttpRequest<unknown>, ...
       return { response };
     })
     .catch(networkErrorCatcher);
+
+/**
+ * A {@link HttpClient} that returns a `Promise<HttpResponse<T>>`.
+ *
+ * This is used by {@link createHttpFetchRequest} to make fetch requests.
+ *
+ * Common clients are:
+ * - {@link defaultJsonFetchClient} for REST JSON API
+ * - raw {@link fetchClient} for non-JSON API (so often just for binary content)
+ */
+export type HttpFetchClient = <T>(httpRequest: HttpRequest<unknown>) => Promise<HttpResponse<T>>;
+
+export const createHttpFetchRequest = <T>(baseUrl: string, method: HttpMethod, path: string, httpClient: HttpFetchClient)
+  : HttpRequest<HttpPromise<T>> => new HttpRequest<HttpPromise<T>>(
+  (httpRequest) => new HttpPromise<T>(
+    unwrapHttpPromise(httpClient(httpRequest)),
+    httpRequest,
+  ),
+  baseUrl,
+  method,
+  path,
+);
