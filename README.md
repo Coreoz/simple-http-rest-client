@@ -36,20 +36,11 @@ A request builder will be returned, when executed, this request will return a [H
 
 ```typescript
 restRequest<T>(method: HttpMethod, path: string): HttpRequest<HttpPromise<T>> {
-  return new HttpRequest<HttpPromise<T>>(
-    // the base API client
-    (httpRequest) => new HttpPromise<T>(
-      // unwrapHttpPromise enables to transforme a Promise<HttpResponse<T>> result to a HttpPromise<T> result
-      // while defaultJsonFetchClient will connect take care of HTTP exchange and try to parse the result to a JSON T object (the generic parameter that represents the type we are waiting for)
-      unwrapHttpPromise(defaultJsonFetchClient(httpRequest)),
-      httpRequest,
-    ),
-    // the base URL, e.g. https://google.fr/api
-    baseUrl,
-    // the method, e.g. HttpMethod.GET
-    method,
-    // the path, e.g. /users/123/addresses
-    path,
+  return createHttpFetchRequest(
+    baseUrl, // the base URL, e.g. https://google.fr/api
+    method, // the method, e.g. HttpMethod.GET
+    path, // the path, e.g. /users/123/addresses
+    defaultJsonFetchClient // the base API client
   );
 }
 ```

@@ -1,5 +1,9 @@
 import { Logger } from 'simple-logging-system';
-import { HttpRequest, HttpClient } from 'simple-http-request-builder';
+import {
+  HttpRequest,
+  HttpClient,
+  HttpMethod,
+} from 'simple-http-request-builder';
 import {
   genericError,
   HttpResponse,
@@ -7,6 +11,7 @@ import {
   networkError,
   timeoutError,
 } from './HttpResponse';
+import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
 
 const logger = new Logger('FetchClient');
 
@@ -113,3 +118,36 @@ export const fetchClient = <T = Response>(httpRequest: HttpRequest<unknown>, ...
       return { response };
     })
     .catch(networkErrorCatcher);
+
+/**
+ * A {@link HttpClient} that uses {@link HttpRequest} and returns a `Promise<HttpResponse<T>>`.
+ *
+ * This is used by {@link createHttpFetchRequest} to make fetch requests.
+ *
+ * Common clients are:
+ * - {@link defaultJsonFetchClient} for REST JSON API
+ * - raw {@link fetchClient} for non-JSON API (so often just for binary content)
+ */
+export type HttpFetchClient = <T>(httpRequest: HttpRequest<unknown>) => Promise<HttpResponse<T>>;
+
+/**
+ * Factory function to create fetch {@link HttpRequest}.
+ *
+ * @param baseUrl The base URL. It should not contain an ending slash. A valid base URL is: http://hostname/api
+ * @param method The HTTP method used for the request, see {@link HttpMethod}
+ * @param path The path of the endpoint to call, it should be composed with a leading slash
+ * and will be appended to the {@link HttpRequest#baseUrl}. A valid path is: /users
+ * @param httpClient The fetch client that uses {@link HttpRequest} and returns a `Promise<HttpResponse<T>>`
+ */
+export const createHttpFetchRequest = <T>(
+  baseUrl: string, method: HttpMethod, path: string, httpClient: HttpFetchClient,
+)
+  : HttpRequest<HttpPromise<T>> => new HttpRequest<HttpPromise<T>>(
+    (httpRequest) => new HttpPromise<T>(
+      unwrapHttpPromise(httpClient(httpRequest)),
+      httpRequest,
+    ),
+    baseUrl,
+    method,
+    path,
+  );

@@ -1,9 +1,15 @@
 // content type validator
 export { contentTypeValidator } from './lib/client/ContentTypeValidator';
 // fetch client
-export { fetchClientExecutor, networkErrorCatcher, fetchClient } from './lib/client/FetchClient';
+export {
+  fetchClientExecutor,
+  networkErrorCatcher,
+  fetchClient,
+  createHttpFetchRequest,
+} from './lib/client/FetchClient';
 export type {
   FetchResponseHandler,
+  HttpFetchClient,
 } from './lib/client/FetchClient';
 // fetch status validators
 export { validateBasicStatusCodes } from './lib/client/FetchStatusValidators';
