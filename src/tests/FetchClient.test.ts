@@ -44,7 +44,7 @@ describe('Tests fetch client', () => {
   test('Check simple request sample', async () => {
     setMockedBody({ test: 1 });
     const response = await new ApiHttpClient()
-      .rawRequest(HttpMethod.GET, '/users')
+      .rawRequest(HttpMethod.GET, 'https://hostname/users')
       .execute()
       .toPromise();
     expect(response.status).toBe(200);
@@ -57,7 +57,7 @@ describe('Tests fetch client', () => {
   test('Check network error rejects promise with networkError', async () => {
     mockedPromiseError = new Error();
     const response = new ApiHttpClient()
-      .rawRequest(HttpMethod.GET, '/users')
+      .rawRequest(HttpMethod.GET, 'https://hostname/users')
       .execute()
       .toPromise();
     await expect(response).rejects.toEqual(networkError);
@@ -67,7 +67,7 @@ describe('Tests fetch client', () => {
     mockedPromiseError = new Error();
     mockedPromiseError.name = 'AbortError';
     const response = new ApiHttpClient()
-      .rawRequest(HttpMethod.GET, '/users')
+      .rawRequest(HttpMethod.GET, 'https://hostname/users')
       .execute()
       .toPromise();
     await expect(response).rejects.toEqual(timeoutError);
