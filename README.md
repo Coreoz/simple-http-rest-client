@@ -45,6 +45,8 @@ restRequest<T>(method: HttpMethod, path: string): HttpRequest<HttpPromise<T>> {
 }
 ```
 
+In a browser environment, the base URL can be built using the `window.location` object: `${window.location.protocol}//${window.location.host}/api`
+
 ### Configure each API endpoint
 Here the goal is to configure the specific API call to an endpoint. So the previous [API client](#configure-the-api-client) created will be used.
 
