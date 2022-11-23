@@ -57,7 +57,7 @@ export const networkErrorCatcher = <T>(error: Error): HttpResponse<T> => {
       error: timeoutError,
     };
   }
-  logger.error('Cannot connect to HTTP server due to a network error', error);
+  logger.warn('Cannot connect to HTTP server due to a network error', { error });
   return {
     error: networkError,
   };
@@ -111,7 +111,7 @@ export const fetchClient = <T = Response>(httpRequest: HttpRequest<unknown>, ...
             return handlerResult;
           }
         } catch (error) {
-          logger.error('Error executing handler', handler, error);
+          logger.error('Error executing handler', { error });
           return toErrorResponsePromise(genericError);
         }
       }

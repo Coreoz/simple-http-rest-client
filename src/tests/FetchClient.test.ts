@@ -55,7 +55,7 @@ describe('Tests fetch client', () => {
   });
 
   test('Check network error rejects promise with networkError', async () => {
-    mockedPromiseError = new Error();
+    mockedPromiseError = new Error('Mocked error');
     const response = new ApiHttpClient()
       .rawRequest(HttpMethod.GET, 'https://hostname/users')
       .execute()
