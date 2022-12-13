@@ -40,7 +40,7 @@ export type JsonErrorMapper = (response: Response, json: any) => HttpResponse<un
  */
 export const defaultJsonErrorMapper: JsonErrorMapper = (response: Response, json) => {
   if (typeof json.errorCode === 'undefined') {
-    logger.error('Unrecognized JSON error', response);
+    logger.warn('Unrecognized JSON error', { response });
     return { error: genericError };
   }
   return { error: json };
@@ -74,7 +74,7 @@ export const toJsonResponse = (
     return jsonErrorMapper(response, json);
   })
   .catch((error) => {
-    logger.error('Cannot parse JSON', error);
+    logger.error('Cannot parse JSON', { error });
     return {
       error: genericError,
     };

@@ -63,7 +63,7 @@ function safeThen<P, R>(thenFunction: PromiseFunction<P, R>, debugContext?: obje
         // If the then function has thrown a HttpError object, we assume this is legitimate
         throw error;
       }
-      logger.error('Error applying then function', { debugContext, parameter }, error);
+      logger.error('Error applying then function', { debugContext, parameter, error });
       // We actually want to through an object literal and not and `Error`
       // eslint-disable-next-line @typescript-eslint/no-throw-literal
       throw genericError;
@@ -82,13 +82,13 @@ function safeCatch<R>(catchFunction: PromiseFunction<HttpError, R>, debugContext
           // If the catch function has thrown a HttpError object, we assume this is legitimate
           throw error;
         }
-        logger.error('Error applying catch function', { debugContext, httpError }, error);
+        logger.error('Error applying catch function', { debugContext, httpError, error });
         // We actually want to through an object literal and not and `Error`
         // eslint-disable-next-line @typescript-eslint/no-throw-literal
         throw genericError;
       }
     }
-    logger.error('Error thrown is not an httpError', { debugContext }, httpError);
+    logger.error('Error thrown is not an httpError', { debugContext, httpError });
     // We actually want to through an object literal and not and `Error`
     // eslint-disable-next-line @typescript-eslint/no-throw-literal
     throw genericError;

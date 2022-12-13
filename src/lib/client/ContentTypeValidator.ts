@@ -22,7 +22,7 @@ export const contentTypeValidator = (
   // make sure the response is a JSON one
   const contentType = response.headers.get('content-type');
   if (contentType === null || contentType.indexOf(searchContentType) === -1) {
-    logger.error(`Response type is not ${searchContentType}`, response);
+    logger.warn(`Response type is not ${searchContentType}`, { response });
     return toErrorResponsePromise(genericError);
   }
 

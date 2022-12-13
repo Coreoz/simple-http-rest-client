@@ -13,7 +13,7 @@ const logger = new Logger('FetchStatusValidators');
 export const validateBasicStatusCodes: FetchResponseHandler = (response: Response) => {
   // if the error is a forbidden access, the body should be empty
   if (response.status === 403) {
-    logger.warn('Forbidden access', response);
+    logger.warn('Forbidden access', { response });
     return toErrorResponsePromise(forbiddenError);
   }
 
