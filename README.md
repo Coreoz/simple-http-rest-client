@@ -260,6 +260,19 @@ A use case is Server-Side-Rendering:
 
 For more information, see the corresponding source code: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/promise/PromiseMonitor.ts>
 
+When used with an `HttpFetchClient`, `HttpPromiseMonitor` should be used instead of `PromiseMonitor`.
+It can then be used like that:
+```typescript
+restRequest<T>(method: HttpMethod, path: string): HttpRequest<HttpPromise<T>> {
+  return createHttpFetchRequest(
+    this.baseUrl,
+    method,
+    path,
+    this.httpPromiseMonitor.makeMonitor(defaultJsonFetchClient, { method, path }),
+  );
+}
+```
+
 Tree shaking
 ------------
 This library supports tree shaking: components from this library that are not used will not end in your final build as long as your bundler supports this feature.
