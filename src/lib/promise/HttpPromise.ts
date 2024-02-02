@@ -151,10 +151,10 @@ export class HttpPromise<T> {
    *
    * @param thenFunction The code that will be executed after the `Promise` has been resolved.
    */
-  then<R = void>(thenFunction: PromiseFunction<T, R>): HttpPromise<R> {
+  then<R = void>(thenFunction: PromiseFunction<T, R>): HttpPromise<Awaited<R>> {
     this.isThenAttached = true;
     this.promise = this.promise.then(safeThen(thenFunction, this.debugContext));
-    return this as unknown as HttpPromise<R>;
+    return this as unknown as HttpPromise<Awaited<R>>;
   }
 
   /**
