@@ -151,10 +151,10 @@ export class HttpPromise<T> {
    *
    * @param thenFunction The code that will be executed after the `Promise` has been resolved.
    */
-  then<R = void>(thenFunction: PromiseFunction<T, R>): HttpPromise<R> {
+  then<R = void>(thenFunction: PromiseFunction<T, R>): HttpPromise<Awaited<R>> {
     this.isThenAttached = true;
     this.promise = this.promise.then(safeThen(thenFunction, this.debugContext));
-    return this as unknown as HttpPromise<R>;
+    return this as unknown as HttpPromise<Awaited<R>>;
   }
 
   /**
@@ -174,10 +174,10 @@ export class HttpPromise<T> {
    * @param catchFunction The code that will do something with the {@link HttpError}
    * and possibility recover the `Promise`.
    */
-  catch<R = void>(catchFunction: PromiseFunction<HttpError, R>): HttpPromise<R | T> {
+  catch<R = void>(catchFunction: PromiseFunction<HttpError, R>): HttpPromise<Awaited<R>> {
     this.isCaughtAttached = true;
     this.promise = this.promise.catch(safeCatch(catchFunction, this.debugContext));
-    return this as unknown as HttpPromise<R>;
+    return this as unknown as HttpPromise<Awaited<R>>;
   }
 
   /**
