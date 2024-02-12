@@ -45,7 +45,7 @@ const executeGetUserRequest = (mockUser: MockUser): HttpPromise<MockUser> => {
   setMockedBody(mockUser);
   // Add client
   const apiClient: ApiHttpClient = new ApiHttpClient();
-  // Execute request in request
+  // Execute request
   return apiClient
     .restRequest<MockUser>(HttpMethod.GET, 'https://hostname/users')
     .execute();
@@ -154,7 +154,7 @@ describe('Tests fetch client', () => {
       '/users',
     )
       .execute()
-      .catch((e: HttpError) => e);
+      .catch((httpError: HttpError) => httpError);
 
     expect(result.errorCode).toEqual('INTERNAL_ERROR');
   });
