@@ -1,17 +1,15 @@
-import { Logger } from 'simple-logging-system';
 import {
-  HttpRequest,
-  HttpClient,
-  HttpMethod,
+  HttpClient, HttpMethod, HttpOptions, HttpRequest,
 } from 'simple-http-request-builder';
+import { Logger } from 'simple-logging-system';
+import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
 import {
   genericError,
   HttpResponse,
-  toErrorResponsePromise,
   networkError,
   timeoutError,
+  toErrorResponsePromise,
 } from './HttpResponse';
-import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
 
 const logger = new Logger('FetchClient');
 
@@ -35,7 +33,7 @@ export const fetchClientExecutor: HttpClient<Promise<Response>> = (httpRequest: 
       headers: httpRequest.headersValue,
       method: httpRequest.method,
       body: httpRequest.bodyValue,
-      credentials: 'same-origin',
+      credentials: httpRequest.optionValues.credentials,
       signal: httpRequest.optionValues.timeoutAbortController.signal,
     },
   )
@@ -102,7 +100,7 @@ export interface FetchResponseHandler<T = unknown> {
  * @param handlers The {@link FetchResponseHandler}s to execute on an OK response (status code = 2xx)
  */
 export const fetchClient = <T = Response>(httpRequest: HttpRequest<unknown>, ...handlers: FetchResponseHandler[])
-  : Promise<HttpResponse<T>> => <Promise<HttpResponse<T>>> fetchClientExecutor(httpRequest)
+  : Promise<HttpResponse<T>> => <Promise<HttpResponse<T>>>fetchClientExecutor(httpRequest)
     .then((response) => {
       for (const handler of handlers) {
         try {
@@ -138,9 +136,14 @@ export type HttpFetchClient = <T>(httpRequest: HttpRequest<unknown>) => Promise<
  * @param path The path of the endpoint to call, it should be composed with a leading slash
  * and will be appended to the {@link HttpRequest#baseUrl}. A valid path is: /users
  * @param httpClient The fetch client that uses {@link HttpRequest} and returns a `Promise<HttpResponse<T>>`
+ * @param options Optional options to configure the request
  */
 export const createHttpFetchRequest = <T>(
-  baseUrl: string, method: HttpMethod, path: string, httpClient: HttpFetchClient,
+  baseUrl: string,
+  method: HttpMethod,
+  path: string,
+  httpClient: HttpFetchClient,
+  options?: Partial<HttpOptions>,
 )
   : HttpRequest<HttpPromise<T>> => new HttpRequest<HttpPromise<T>>(
     (httpRequest) => new HttpPromise<T>(
@@ -150,4 +153,5 @@ export const createHttpFetchRequest = <T>(
     baseUrl,
     method,
     path,
+    options,
   );
