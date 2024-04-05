@@ -40,7 +40,8 @@ restRequest<T>(method: HttpMethod, path: string): HttpRequest<HttpPromise<T>> {
     baseUrl, // the base URL, e.g. https://google.fr/api
     method, // the method, e.g. HttpMethod.GET
     path, // the path, e.g. /users/123/addresses
-    defaultJsonFetchClient // the base API client
+    defaultJsonFetchClient, // the base API client
+    options, // optional http options
   );
 }
 ```
