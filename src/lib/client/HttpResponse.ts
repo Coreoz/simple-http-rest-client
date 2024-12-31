@@ -58,3 +58,11 @@ export const timeoutError = {
 export const forbiddenError = {
   errorCode: 'FORBIDDEN_ERROR',
 };
+
+export const unauthorizedError = {
+  errorCode: 'UNAUTHORIZED_ERROR',
+};
+
+export const notFoundError = {
+  errorCode: 'NOT_FOUND_ERROR',
+};
