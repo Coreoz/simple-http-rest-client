@@ -1,10 +1,7 @@
-import { HttpRequest, HttpMethod } from 'simple-http-request-builder';
-import { HttpPromise } from '../lib/promise/HttpPromise';
+import { HttpMethod, HttpRequest } from 'simple-http-request-builder';
+import { createHttpFetchRequest, fetchClient } from '../lib/client/FetchClient';
 import { defaultJsonFetchClient } from '../lib/client/JsonFetchClient';
-import {
-  createHttpFetchRequest,
-  fetchClient,
-} from '../lib/client/FetchClient';
+import { HttpPromise } from '../lib/promise/HttpPromise';
 
 const baseUrl = 'https://hostname/api';
 
