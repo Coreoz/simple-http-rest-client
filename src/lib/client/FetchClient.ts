@@ -126,7 +126,7 @@ export const fetchClient = <T = Response>(httpRequest: HttpRequest<unknown>, ...
  * - {@link defaultJsonFetchClient} for REST JSON API
  * - raw {@link fetchClient} for non-JSON API (so often just for binary content)
  */
-export type HttpFetchClient = <T>(httpRequest: HttpRequest<unknown>) => Promise<HttpResponse<T>>;
+export type HttpFetchClient<T> = (httpRequest: HttpRequest<unknown>) => Promise<HttpResponse<T>>;
 
 /**
  * Factory function to create fetch {@link HttpRequest}.
@@ -142,11 +142,11 @@ export const createHttpFetchRequest = <T>(
   baseUrl: string,
   method: HttpMethod,
   path: string,
-  httpClient: HttpFetchClient,
+  httpClient: HttpFetchClient<T>,
   options?: Partial<HttpOptions>,
 )
   : HttpRequest<HttpPromise<T>> => new HttpRequest<HttpPromise<T>>(
-    (httpRequest) => new HttpPromise<T>(
+    (httpRequest: HttpRequest<unknown>) => new HttpPromise<T>(
       unwrapHttpPromise(httpClient(httpRequest)),
       httpRequest,
     ),

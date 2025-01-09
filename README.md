@@ -274,6 +274,45 @@ restRequest<T>(method: HttpMethod, path: string): HttpRequest<HttpPromise<T>> {
 }
 ```
 
+### Downloading file
+
+Fetching a file can be done in two ways :
+- by adding a `rawRequest` to the ApiHttpClient and using the default `fetchClient`
+- by adding a `fileRequest` to the ApiHttpClient and using the `fileFetchClient`
+
+```ts
+export default class ApiHttpClient {
+    rawRequest(method: HttpMethod, path: string): HttpRequest<HttpPromise<Response>> {
+        return createHttpFetchRequest(baseUrl, method, path, fetchClient);
+    }
+
+    fileRequest(method: HttpMethod, path: string): HttpRequest<HttpPromise<ArrayBuffer>> {
+        return createHttpFetchRequest(baseUrl, method, path, fileFetchClient);
+    }
+}
+``` 
+
+Note 1 :
+- if you use rawRequest, the raw response object is available whe  the promise is resolved
+It means that you must handle yourself the HTTP status of the response and the response's body parsing
+- if you use fileRequest, 
+  - the API must have the `content-type` header set to `application/octet-stream`
+  - the API must return the file as a byte array
+  - the byte array will be available when the promise is resolved
+  - if the HTTP status code of the response is not `2XX`, error body will be parsed using `toJsonResponse` and an `HttpError` will be rejected by the promise 
+
+Note 2 :
+- if the API does not have the value `application/octet-stream` set to the header, 
+you can create your own fetchClient with its handlers like this :
+```ts
+export const customFileFetchClient = (httpRequest: HttpRequest<unknown>): Promise<HttpResponse<ArrayBuffer>> => fetchClient(
+    httpRequest,
+    validateBasicStatusCodes,
+    // others handlers if needed
+    toArrayBufferResponse,
+);
+```
+
 Tree shaking
 ------------
 This library supports tree shaking: components from this library that are not used will not end in your final build as long as your bundler supports this feature.
