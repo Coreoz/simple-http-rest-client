@@ -42,9 +42,9 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<unkno
     // Handle response
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        return resolve({ response: xhr.response });
+        return resolve({ response: JSON.parse(xhr.response) });
       }
-      return resolve({ error: xhr.response ?? genericError });
+      return resolve({ error: JSON.parse(xhr.response) ?? genericError });
     };
 
     // Handle network errors
