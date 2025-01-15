@@ -1,9 +1,9 @@
 import { HttpMethod } from 'simple-http-request-builder';
 import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
-import { networkErrorCatcher } from './FetchClient';
+import { networkErrorCatcher } from '../client/FetchClient';
 import {
   genericError, HttpResponse, networkError, timeoutError,
-} from './HttpResponse';
+} from '../client/HttpResponse';
 import {
   MultipartHttpClient,
   MultipartHttpOptions,
