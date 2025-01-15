@@ -349,6 +349,9 @@ export default class FilesApi {
 }
 ```
 
+> Note : XHR seems way easier (2025), but maybe in the future we could use Fetch using ReadableStream like in the [WIP branch multipart-readable-stream](https://github.com/Coreoz/simple-http-rest-client/tree/feature/multipart-readable-stream).  
+> See : https://github.com/Coreoz/simple-http-rest-client/commit/460b7cc8fe056e95a7708bd97c04c35f552148bd for the detail
+
 Tree shaking
 ------------
 This library supports tree shaking: components from this library that are not used will not end in your final build as long as your bundler supports this feature.
