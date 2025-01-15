@@ -1,21 +1,18 @@
-import { HttpMethod } from 'simple-http-request-builder';
-
 export type MultipartHttpOptions = {
   timeoutInMillis: number,
+  timeoutAbortController: AbortController,
   onProgressCallback: (event: ProgressEvent) => void,
-  withCredentials: boolean,
+  boundary: string,
 };
 
-export type MultipartHttpClient<T> = (request: MultipartHttpRequest<unknown>) => T;
+export interface MultipartHttpClient<T> {
+  (request: MultipartHttpRequest<unknown>): T;
+}
 
 export class MultipartHttpRequest<T> {
-  private static readonly DEFAULT_TIMEOUT_IN_MILLIS: number = 60_000; // 1 minute
-
   readonly multipartHttpClient: MultipartHttpClient<T>;
 
   readonly baseUrl: URL;
-
-  readonly method: HttpMethod;
 
   readonly path: string;
 
@@ -28,20 +25,20 @@ export class MultipartHttpRequest<T> {
   constructor(
     multipartHttpClient: MultipartHttpClient<T>,
     baseUrl: string,
-    method: HttpMethod,
     path: string,
     options?: Partial<MultipartHttpOptions>,
   ) {
     this.multipartHttpClient = multipartHttpClient;
     this.baseUrl = new URL(baseUrl);
-    this.method = method;
     this.path = path;
     this.headersValue = {};
     this.formData = new FormData();
     this.optionValues = {
-      timeoutInMillis: options?.timeoutInMillis ?? MultipartHttpRequest.DEFAULT_TIMEOUT_IN_MILLIS,
-      onProgressCallback: options?.onProgressCallback ?? (() => {}),
-      withCredentials: options?.withCredentials ?? false,
+      timeoutInMillis: options?.timeoutInMillis ?? 60000,
+      timeoutAbortController: options?.timeoutAbortController ?? new AbortController(),
+      onProgressCallback: options?.onProgressCallback ?? (() => {
+      }),
+      boundary: options?.boundary ?? `boundary-${Date.now()}`,
     };
   }
 
@@ -55,18 +52,6 @@ export class MultipartHttpRequest<T> {
       if (multipartHttpDataEntry[1]) {
         this.formData.append(multipartHttpDataEntry[0], multipartHttpDataEntry[1]);
       }
-    }
-    return this;
-  }
-
-  file(file: File) {
-    this.data([['file', file]]);
-    return this;
-  }
-
-  files(files: File[]) {
-    for (const file of files) {
-      this.file(file);
     }
     return this;
   }

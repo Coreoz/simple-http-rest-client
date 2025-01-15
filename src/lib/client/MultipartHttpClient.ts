@@ -1,98 +1,136 @@
 import { HttpMethod } from 'simple-http-request-builder';
-import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
-import { networkErrorCatcher } from './FetchClient';
 import {
-  genericError, HttpResponse, networkError, timeoutError,
-} from './HttpResponse';
+  FetchResponseHandler,
+  genericError,
+  HttpPromise,
+  HttpResponse,
+  networkErrorCatcher,
+  toErrorResponsePromise,
+  unwrapHttpPromise,
+} from 'simple-http-rest-client';
+import { Logger } from 'simple-logging-system';
 import {
   MultipartHttpClient,
   MultipartHttpOptions,
   MultipartHttpRequest,
 } from './MultipartHttpRequest';
 
-/**
- * Handle multipart request using {@link XMLHttpRequest}
- * @param multipartHttpRequest the request to be executed
- */
+const logger: Logger = new Logger('MultipartHttpClient');
+
 export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<unknown>> = (
   multipartHttpRequest: MultipartHttpRequest<unknown>,
-): Promise<unknown> => {
-  const xhr: XMLHttpRequest = new XMLHttpRequest();
+): Promise<Response> => {
+  const { boundary }: MultipartHttpOptions = multipartHttpRequest.optionValues;
+  const stream: ReadableStream<unknown> = new ReadableStream({
+    start(controller: ReadableStreamDefaultController<unknown>) {
+      const encoder: TextEncoder = new TextEncoder();
+      const entries = Array.from(multipartHttpRequest.formData.entries());
+      const processNextEntry = (index: number) => {
+        if (index >= entries.length) {
+          // Finalize the stream with the closing boundary
+          controller.enqueue(encoder.encode(`--${boundary}--\r\n`));
+          controller.close();
+          return;
+        }
 
-  // Abort request after configured timeout time
-  const timeoutHandle: ReturnType<typeof setTimeout> = setTimeout(
-    () => xhr.abort(),
+        const [name, data] = entries[index];
+        const enqueueBoundaryAndHeaders = () => {
+          controller.enqueue(encoder.encode(`--${boundary}\r\n`));
+          if (data instanceof Blob) {
+            // Binary data
+            const contentType = data.type || 'application/octet-stream';
+            controller.enqueue(encoder.encode(
+              `Content-Disposition: form-data; name="${name}"; filename="${name}"\r\n`
+              + `Content-Type: ${contentType}\r\n\r\n`,
+            ));
+            return data.stream().getReader();
+          }
+          // Text data
+          controller.enqueue(encoder.encode(
+            `Content-Disposition: form-data; name="${name}"\r\n\r\n`,
+          ));
+          controller.enqueue(encoder.encode(`${data.toString()}\r\n`));
+          return null;
+        };
+
+        const reader = enqueueBoundaryAndHeaders();
+
+        // Handle text directly, or start processing binary data
+        if (!reader) {
+          processNextEntry(index + 1); // Process the next entry
+          return;
+        }
+
+        // Process the binary data with recursion
+        const pumpReader = () => {
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              // Move to the next entry
+              controller.enqueue(encoder.encode('\r\n'));
+              processNextEntry(index + 1);
+            } else {
+              // Enqueue the current chunk
+              controller.enqueue(value);
+              pumpReader(); // Process the next chunk
+            }
+          });
+        };
+
+        pumpReader();
+      };
+
+      processNextEntry(0); // Start processing the first entry
+    },
+    cancel: (reason: unknown) => {
+      multipartHttpRequest.optionValues.timeoutAbortController.abort(reason);
+    },
+  });
+  const timeoutHandle = setTimeout(
+    () => stream.cancel('timeout'),
     multipartHttpRequest.optionValues.timeoutInMillis,
   );
-
-  // Return a promise that resolves when the request is complete
-  return new Promise<unknown>((resolve: (value: unknown) => void) => {
-    xhr.open(multipartHttpRequest.method, multipartHttpRequest.buildUrl(), true);
-
-    // Set credentials
-    xhr.withCredentials = multipartHttpRequest.optionValues.withCredentials;
-
-    // Set headers
-    if (multipartHttpRequest.headersValue) {
-      for (const [key, value] of Object.entries(multipartHttpRequest.headersValue)) {
-        xhr.setRequestHeader(key, value);
-      }
-    }
-
-    // Handle response
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        return resolve({ response: JSON.parse(xhr.response) });
-      }
-      return resolve({ error: JSON.parse(xhr.response) ?? genericError });
-    };
-
-    // Handle network errors
-    xhr.onerror = () => resolve({ error: networkError });
-
-    // Handle request timeout
-    xhr.ontimeout = () => resolve({ error: timeoutError });
-
-    // Handle progress
-    xhr.upload.onprogress = (event: ProgressEvent) => {
-      multipartHttpRequest.optionValues.onProgressCallback(event);
-    };
-
-    xhr.upload.onerror = () => resolve({ error: genericError });
-
-    // Send the request
-    xhr.send(multipartHttpRequest.formData);
-  })
+  return fetch(
+    multipartHttpRequest.buildUrl(),
+    {
+      headers: {
+        ...multipartHttpRequest.headersValue,
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      },
+      method: HttpMethod.POST,
+      body: stream,
+      signal: multipartHttpRequest.optionValues.timeoutAbortController.signal,
+      duplex: 'half',
+    },
+  )
     .finally(() => clearTimeout(timeoutHandle));
 };
 
-/**
- * A {@link MultipartHttpFetchClient} that executes an {@link MultipartHttpRequest} that returns JSON responses.
- * It uses {@link multipartHttpFetchClient} to executes the {@link MultipartHttpRequest}.
- */
 export const multipartHttpFetchClient = <T = void>(
   httpRequest: MultipartHttpRequest<unknown>,
+  ...handlers: FetchResponseHandler[]
 ): Promise<HttpResponse<T>> => <Promise<HttpResponse<T>>>multipartHttpFetchClientExecutor(httpRequest)
+  .then((response) => {
+    for (const handler of handlers) {
+      try {
+        const handlerResult = handler(response);
+        if (handlerResult !== undefined) {
+          return handlerResult;
+        }
+      } catch (error) {
+        logger.error('Error executing handler', { error });
+        return toErrorResponsePromise(genericError);
+      }
+    }
+    return { response };
+  })
   .catch(networkErrorCatcher);
 
 export type MultipartHttpFetchClient = <T>(
   multipartHttpRequest: MultipartHttpRequest<unknown>,
 ) => Promise<HttpResponse<T>>;
 
-/**
- * Factory function to create fetch {@link MultipartHttpRequest}.
- *
- * @param baseUrl The base URL. It should not contain an ending slash. A valid base URL is: http://hostname/api
- * @param method The HTTP method used for the request, see {@link HttpMethod}
- * @param path The path of the endpoint to call, it should be composed with a leading slash
- * and will be appended to the {@link MultipartHttpRequest#baseUrl}. A valid path is: /users
- * @param multipartHttpClient The fetch client that uses {@link MultipartHttpRequest} and returns
- * a `Promise<HttpResponse<T>>`
- * @param options Optional options to configure the request
- */
 export function createMultipartHttpFetchRequest<T>(
   baseUrl: string,
-  method: HttpMethod,
   path: string,
   multipartHttpClient: MultipartHttpFetchClient,
   options?: Partial<MultipartHttpOptions>,
@@ -103,7 +141,6 @@ export function createMultipartHttpFetchRequest<T>(
       multipartHttpRequest,
     ),
     baseUrl,
-    method,
     path,
     options,
   );
