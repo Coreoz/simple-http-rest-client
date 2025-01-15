@@ -313,6 +313,45 @@ export const customFileFetchClient = (httpRequest: HttpRequest<unknown>): Promis
 );
 ```
 
+### Upload file
+
+You can use `createMultipartHttpFetchRequest` to upload a file or a list of files by adding a 
+`multipartRequest` method to your API client.  
+
+```ts
+export default class ApiHttpClient {
+    // ...
+    multipartRequest<T>(method: HttpMethod, path: string): MultipartHttpRequest<HttpPromise<T>> {
+      return createMultipartHttpFetchRequest<T>(baseUrl, method, path, multipartHttpFetchClient);
+    }
+}
+```
+
+Usage example :
+```ts
+export default class FilesApi {
+  private readonly BASE_URL: string = '/orders';
+
+  constructor(private readonly httpClient: ApiHttpClient) {
+  }
+
+  uploadFiles = (files: File[]): HttpPromise<UploadFileResponse> => this
+    .httpClient
+    .mulitpartRequest<UploadFileResponse>(HttpMethod.POST, this.BASE_URL)
+    .files(files)
+    .execute();
+
+  uploadFile = (files: File): HttpPromise<UploadFileResponse> => this
+    .httpClient
+    .mulitpartRequest<UploadFileResponse>(HttpMethod.POST, this.BASE_URL)
+    .file(file)
+    .execute();
+}
+```
+
+> Note : XHR seems way easier (2025), but maybe in the future we could use Fetch using ReadableStream like in the [WIP branch multipart-readable-stream](https://github.com/Coreoz/simple-http-rest-client/tree/feature/multipart-readable-stream).  
+> See : https://github.com/Coreoz/simple-http-rest-client/commit/460b7cc8fe056e95a7708bd97c04c35f552148bd for the detail
+
 Tree shaking
 ------------
 This library supports tree shaking: components from this library that are not used will not end in your final build as long as your bundler supports this feature.
