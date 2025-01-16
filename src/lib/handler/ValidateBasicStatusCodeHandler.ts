@@ -1,8 +1,8 @@
 import { Logger } from 'simple-logging-system';
-import { forbiddenError, HttpResponse, toErrorResponsePromise } from './HttpResponse';
-import { FetchResponseHandler } from './FetchClient';
+import { forbiddenError, HttpResponse, toErrorResponsePromise } from '../client/HttpResponse';
+import { FetchResponseHandler } from '../client/FetchClient';
 
-const logger = new Logger('FetchStatusValidators');
+const logger = new Logger('ValidateBasicStatusValidator');
 
 /**
  * A {@link FetchResponseHandler} that verify if the status code:

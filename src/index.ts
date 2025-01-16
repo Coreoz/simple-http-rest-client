@@ -1,6 +1,4 @@
-// content type validator
-export { contentTypeValidator } from './lib/client/ContentTypeValidator';
-// fetch client
+// clients
 export {
   fetchClientExecutor,
   networkErrorCatcher,
@@ -11,8 +9,26 @@ export type {
   FetchResponseHandler,
   HttpFetchClient,
 } from './lib/client/FetchClient';
-// fetch status validators
-export { validateBasicStatusCodes } from './lib/client/FetchStatusValidators';
+export {
+  multipartHttpFetchClient,
+  multipartHttpFetchClientExecutor,
+} from './lib/multipart/MultipartHttpClient';
+export type {
+  MultipartHttpFetchClient,
+} from './lib/multipart/MultipartHttpClient';
+// handlers
+export {
+  validateBasicStatusCodes,
+} from './lib/handler/ValidateBasicStatusCodeHandler';
+export { validateContentType } from './lib/handler/ValidateContentTypeHandler';
+export {
+  toJsonResponse, defaultJsonErrorMapper,
+} from './lib/handler/ResponseJsonHandler';
+export type {
+  JsonErrorMapper,
+} from './lib/handler/ResponseJsonHandler';
+export { toTextResponse } from './lib/handler/ResponseTextHandler';
+export { toArrayBufferResponse } from './lib/handler/ResponseArrayBufferHandler';
 // http response
 export type {
   HttpError,
@@ -27,16 +43,15 @@ export {
   timeoutError,
   forbiddenError,
 } from './lib/client/HttpResponse';
-// json fetch client
+// custom fetch clients
 export {
   jsonContentTypeValidator,
-  defaultJsonErrorMapper,
-  toJsonResponse,
   defaultJsonFetchClient,
 } from './lib/client/JsonFetchClient';
-export type {
-  JsonErrorMapper,
-} from './lib/client/JsonFetchClient';
+export {
+  octetStreamTypeValidator,
+  fileFetchClient,
+} from './lib/client/FileFetchClient';
 // http promise
 export {
   processHttpResponse,

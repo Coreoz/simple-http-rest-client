@@ -6780,10 +6780,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-http-request-builder@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "simple-http-request-builder@npm:2.0.1"
-  checksum: 10c0/7846861a949f9ba84558b741f6855a9fae5e19ea547271657f998ca66726a0436efaa3722eb827e2491e652921895d57661ec2e5001fb96cdcc274fb0f27b555
+"simple-http-request-builder@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "simple-http-request-builder@npm:2.1.0"
+  checksum: 10c0/e05c1c464253b203037bb06fa42e10de753bf1a3ce4718dcf3b2e6c888dca887c81723f2580c3015d6715558d88cb96fe2142fee4449c95e17550f50726b899e
   languageName: node
   linkType: hard
 
@@ -6805,7 +6805,7 @@ __metadata:
     jest-config: "npm:^27.5.1"
     node-fetch: "npm:2"
     release-it: "npm:^15.1.0"
-    simple-http-request-builder: "npm:^2.0.1"
+    simple-http-request-builder: "npm:^2.1.0"
     simple-logging-system: "npm:^1.1.0"
     source-map-support: "npm:^0.5.21"
     ts-jest: "npm:^27.1.4"
