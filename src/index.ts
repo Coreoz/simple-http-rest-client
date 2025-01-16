@@ -12,6 +12,7 @@ export type {
 export {
   multipartHttpFetchClient,
   multipartHttpFetchClientExecutor,
+  createMultipartHttpFetchRequest,
 } from './lib/multipart/MultipartHttpClient';
 export type {
   MultipartHttpFetchClient,
