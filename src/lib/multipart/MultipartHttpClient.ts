@@ -75,10 +75,7 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<Respo
 
     // Handle response
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        return resolve(createResponseFromXhr(xhr));
-      }
-      return reject(xhr.response);
+      return resolve(createResponseFromXhr(xhr));
     };
 
     // Handle network errors
