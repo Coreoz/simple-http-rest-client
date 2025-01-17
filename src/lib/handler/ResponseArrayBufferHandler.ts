@@ -28,7 +28,7 @@ export const toArrayBufferResponse = (
 ): Promise<HttpResponse<unknown>> => {
   if (response.ok) {
     return response.arrayBuffer()
-      .then((arrayB: ArrayBuffer) => ({ response: arrayB }))
+      .then((arrayBuffer: ArrayBuffer) => ({ response: arrayBuffer }))
       .catch((error: Error) => {
         logger.error('Response could not be read as an array buffer', { error });
         return { error: genericError };

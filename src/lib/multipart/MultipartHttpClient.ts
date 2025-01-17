@@ -22,9 +22,9 @@ const logger: Logger = new Logger('MultipartHttpClient');
 
 const createResponseFromXhr = (xhr: XMLHttpRequest): Response => {
   // Extract headers from XMLHttpRequest
-  const headers = new Headers();
-  const rawHeaders = xhr.getAllResponseHeaders();
-  rawHeaders.trim().split(/[\r\n]+/).forEach((line) => {
+  const headers: Headers = new Headers();
+  const rawHeaders: string = xhr.getAllResponseHeaders();
+  rawHeaders.trim().split(/[\r\n]+/).forEach((line: string) => {
     const parts = line.split(': ');
     const header = parts.shift();
     const value = parts.join(': ');
@@ -60,7 +60,7 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<Respo
   );
 
   // Return a promise that resolves when the request is complete
-  return new Promise<Response>((resolve: (value: Response) => void, reject: (reason: string) => void) => {
+  return new Promise<Response>((resolve: (value: Response) => void, reject: (reason: Error) => void) => {
     xhr.open(multipartHttpRequest.method, multipartHttpRequest.buildUrl(), true);
 
     // Set credentials
@@ -74,22 +74,20 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<Respo
     }
 
     // Handle response
-    xhr.onload = () => {
-      return resolve(createResponseFromXhr(xhr));
-    };
+    xhr.onload = () => resolve(createResponseFromXhr(xhr));
 
     // Handle network errors
-    xhr.onerror = () => reject(networkError.errorCode);
+    xhr.onerror = () => reject(new Error(networkError.errorCode));
 
     // Handle request timeout
-    xhr.ontimeout = () => reject(timeoutError.errorCode);
+    xhr.ontimeout = () => reject(new Error(timeoutError.errorCode));
 
     // Handle progress
     xhr.upload.onprogress = (event: ProgressEvent) => {
       multipartHttpRequest.optionValues.onProgressCallback(event);
     };
 
-    xhr.upload.onerror = () => reject(networkError.errorCode);
+    xhr.upload.onerror = () => reject(new Error(networkError.errorCode));
 
     // Send the request
     xhr.send(multipartHttpRequest.formData);
