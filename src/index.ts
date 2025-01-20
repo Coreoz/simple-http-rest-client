@@ -68,3 +68,6 @@ export { PromiseMonitor } from './lib/promise/PromiseMonitor';
 export { HttpPromiseMonitor } from './lib/promise/HttpPromiseMonitor';
 // synchronized http promise
 export { SynchronizedHttpPromise } from './lib/promise/SynchronizedHttpPromise';
+
+// to remove in future major release
+export { validateContentType as contentTypeValidator } from './lib/handler/ValidateContentTypeHandler';

@@ -17,21 +17,13 @@ import {
   toErrorResponsePromise,
 } from '../client/HttpResponse';
 import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
+import { parseHeadersFromRawString } from './RawHeaderParser';
 
 const logger: Logger = new Logger('MultipartHttpClient');
 
 const createResponseFromXhr = (xhr: XMLHttpRequest): Response => {
   // Extract headers from XMLHttpRequest
-  const headers: Headers = new Headers();
-  const rawHeaders: string = xhr.getAllResponseHeaders();
-  rawHeaders.trim().split(/[\r\n]+/).forEach((line: string) => {
-    const parts = line.split(': ');
-    const header = parts.shift();
-    const value = parts.join(': ');
-    if (header) {
-      headers.append(header, value);
-    }
-  });
+  const headers: Headers = parseHeadersFromRawString(xhr.getAllResponseHeaders());
 
   // Create the Response body
   const body = xhr.response;
