@@ -50,8 +50,8 @@ export function unwrapHttpPromise<T>(httpPromise: Promise<HttpResponse<T>>): Pro
  *
  * Returns `true` if the object seems to be a {@link HttpError}, else `false`.
  */
-export function isHttpError(object: unknown) {
-  return object && typeof object === 'object' && (object as HttpError).errorCode !== undefined;
+export function isHttpError(object: unknown): object is HttpError {
+  return Boolean(object && typeof object === 'object' && (object as HttpError).errorCode !== undefined);
 }
 
 function safeThen<P, R>(thenFunction: PromiseFunction<P, R>, debugContext?: object): PromiseFunction<P, R> {
