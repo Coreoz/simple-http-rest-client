@@ -1,7 +1,7 @@
 import { Logger } from 'simple-logging-system';
-import { genericError, toErrorResponsePromise } from './HttpResponse';
+import { genericError, toErrorResponsePromise } from '../client/HttpResponse';
 
-const logger = new Logger('ContentTypeValidator');
+const logger = new Logger('ValidateContentTypeHandler');
 
 /**
  * A {@link FetchResponseHandler} maker that verify the content type of a {@link Response}
@@ -15,7 +15,7 @@ const logger = new Logger('ContentTypeValidator');
  * then a response with the header `application/vnd.myapp.type.v1+json` will be valid.
  */
 // eslint-disable-next-line import/prefer-default-export
-export const contentTypeValidator = (
+export const validateContentType = (
   response: Response,
   searchContentType: string,
 ) => {
