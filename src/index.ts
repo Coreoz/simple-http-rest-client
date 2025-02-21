@@ -1,12 +1,10 @@
 // clients
 export {
   fetchClientExecutor,
-  networkErrorCatcher,
   fetchClient,
   createHttpFetchRequest,
 } from './lib/client/FetchClient';
 export type {
-  FetchResponseHandler,
   HttpFetchClient,
 } from './lib/client/FetchClient';
 export {
@@ -30,6 +28,13 @@ export type {
 } from './lib/handler/ResponseJsonHandler';
 export { toTextResponse } from './lib/handler/ResponseTextHandler';
 export { toArrayBufferResponse } from './lib/handler/ResponseArrayBufferHandler';
+export {
+  processHandlers,
+  networkErrorCatcher,
+} from './lib/handler/FetchResponseHandlers';
+export type {
+  FetchResponseHandler,
+} from './lib/handler/FetchResponseHandlers';
 // http response
 export type {
   HttpError,

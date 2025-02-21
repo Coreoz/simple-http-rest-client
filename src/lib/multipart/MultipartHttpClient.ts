@@ -4,24 +4,12 @@ import {
   MultipartHttpOptions,
   MultipartHttpRequest,
 } from 'simple-http-request-builder';
-import { Logger } from 'simple-logging-system';
-import {
-  FetchResponseHandler,
-  networkErrorCatcher,
-} from '../client/FetchClient';
-import {
-  genericError,
-  HttpResponse,
-  networkError,
-  timeoutError,
-  toErrorResponsePromise,
-} from '../client/HttpResponse';
+import { HttpResponse, networkError, timeoutError } from '../client/HttpResponse';
 import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
 import { parseHeadersFromRawString } from './RawHeaderParser';
+import { FetchResponseHandler, networkErrorCatcher, processHandlers } from '../handler/FetchResponseHandlers';
 
-const logger: Logger = new Logger('MultipartHttpClient');
-
-const createResponseFromXhr = (xhr: XMLHttpRequest): Response => {
+export const createResponseFromXhr = (xhr: XMLHttpRequest): Response => {
   // Extract headers from XMLHttpRequest
   const headers: Headers = parseHeadersFromRawString(xhr.getAllResponseHeaders());
 
@@ -95,20 +83,7 @@ export const multipartHttpFetchClient = <T = void>(
   httpRequest: MultipartHttpRequest<unknown>,
   ...handlers: FetchResponseHandler[]
 ): Promise<HttpResponse<T>> => <Promise<HttpResponse<T>>>multipartHttpFetchClientExecutor(httpRequest)
-  .then((response: Response) => {
-    for (const handler of handlers) {
-      try {
-        const handlerResult = handler(response);
-        if (handlerResult !== undefined) {
-          return handlerResult;
-        }
-      } catch (error) {
-        logger.error('Error executing handler', { error });
-        return toErrorResponsePromise(genericError);
-      }
-    }
-    return { response };
-  })
+  .then((response: Response) => processHandlers(response, handlers))
   .catch(networkErrorCatcher);
 
 export type MultipartHttpFetchClient = <T>(
