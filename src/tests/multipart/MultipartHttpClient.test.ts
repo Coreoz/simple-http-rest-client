@@ -120,18 +120,14 @@ describe('multipartHttpFetchClientExecutor', () => {
     const mockProgressEvent = new ProgressEvent('progress', { loaded: 50, total: 100 });
 
     multipartHttpFetchClientExecutor(mockRequest);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    mockXhr.upload.onprogress?.(mockProgressEvent);
+    (mockXhr.upload as XMLHttpRequest).onprogress?.(mockProgressEvent);
 
     expect(mockRequest.optionValues.onProgressCallback).toHaveBeenCalledWith(mockProgressEvent);
   });
 
   test('rejects on upload error', async () => {
     const promise = multipartHttpFetchClientExecutor(mockRequest);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    mockXhr.upload.onerror?.({} as ProgressEvent);
+    (mockXhr.upload as XMLHttpRequest).onerror?.({} as ProgressEvent);
 
     await expect(promise).rejects.toThrow('NETWORK_ERROR');
   });

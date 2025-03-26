@@ -74,5 +74,5 @@ export { HttpPromiseMonitor } from './lib/promise/HttpPromiseMonitor';
 // synchronized http promise
 export { SynchronizedHttpPromise } from './lib/promise/SynchronizedHttpPromise';
 
-// to remove in future major release
+// TODO to remove in the next future major release 3.x.x
 export { validateContentType as contentTypeValidator } from './lib/handler/ValidateContentTypeHandler';
