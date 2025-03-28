@@ -1,17 +1,9 @@
 import {
   HttpClient, HttpMethod, HttpOptions, HttpRequest,
 } from 'simple-http-request-builder';
-import { Logger } from 'simple-logging-system';
 import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
-import {
-  genericError,
-  HttpResponse,
-  networkError,
-  timeoutError,
-  toErrorResponsePromise,
-} from './HttpResponse';
-
-const logger = new Logger('FetchClient');
+import { processHandlers, FetchResponseHandler, networkErrorCatcher } from '../handler/FetchResponseHandlers';
+import { HttpResponse } from './HttpResponse';
 
 /**
  * A {@link HttpClient} that executes an {@link HttpRequest}
@@ -41,48 +33,9 @@ export const fetchClientExecutor: HttpClient<Promise<Response>> = (httpRequest: 
 };
 
 /**
- * Map {@link fetchClientExecutor} Promise errors to {@link HttpError}.
- * See {@link fetchClient} for reasons why these errors may occur.
- *
- * For now `AbortError` are mapped to {@link timeoutError} whereas all the other errors are mapped
- * to the generic {@link networkError}.
- *
- * @param error The raw {@link fetch} Promise {@link Error}
- */
-export const networkErrorCatcher = <T>(error: Error): HttpResponse<T> => {
-  if (error.name === 'AbortError') {
-    return {
-      error: timeoutError,
-    };
-  }
-  logger.warn('Cannot connect to HTTP server due to a network error', { error });
-  return {
-    error: networkError,
-  };
-};
-
-/**
- * Handlers are executed by {@link fetchClient} after a successful HTTP response is available:
- * this means an HTTP response has been received (whichever the response statut, 200, 400 or 500...).
- * These handlers will:
- * - Validate some preconditions and if necessary return an error result
- * - Return a result
- *
- * So a handler can:
- * - Either return a result (which can be a successful result or an error),
- * in that case following handlers **will not be executed**
- * - Either return `undefined`, in that case following handlers **will be executed**
- *
- * Expected results should be of type {@link Promise} of {@link HttpResponse}.
- */
-export interface FetchResponseHandler<T = unknown> {
-  (response: Response): Promise<HttpResponse<T>> | undefined;
-}
-
-/**
  * A {@link HttpClient} that uses:
  * - {@link fetchClientExecutor} to execute an {@link HttpRequest}
- * - {@link FetchResponseHandler handlers} to validate and transform the response
+ * - {@link FetchResponseHandler} handlers to validate and transform the response with {@link processHandlers}
  *
  * There are two outcomes for the execution of the {@link HttpRequest}:
  * - If the execution is successful (an HTTP response has been received),
@@ -92,29 +45,13 @@ export interface FetchResponseHandler<T = unknown> {
  * or that the request has been cancelled using the {@link HttpOptions#timeoutAbortController}
  * (see {@link HttpRequest#optionValues} for details),
  * or else it means there is a bug in the library...
- * in any case {@link networkErrorCatcher} will be executed to map the error to an {@link HttpError}
- *
- * If an {@link FetchResponseHandler handler} raises an error, a {@link genericError} will be returned
  *
  * @param httpRequest The {@link HttpRequest} to execute
  * @param handlers The {@link FetchResponseHandler}s to execute on an OK response (status code = 2xx)
  */
 export const fetchClient = <T = Response>(httpRequest: HttpRequest<unknown>, ...handlers: FetchResponseHandler[])
   : Promise<HttpResponse<T>> => <Promise<HttpResponse<T>>>fetchClientExecutor(httpRequest)
-    .then((response) => {
-      for (const handler of handlers) {
-        try {
-          const handlerResult = handler(response);
-          if (handlerResult !== undefined) {
-            return handlerResult;
-          }
-        } catch (error) {
-          logger.error('Error executing handler', { error });
-          return toErrorResponsePromise(genericError);
-        }
-      }
-      return { response };
-    })
+    .then((response: Response) => processHandlers(response, handlers))
     .catch(networkErrorCatcher);
 
 /**

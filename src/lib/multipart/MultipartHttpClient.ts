@@ -1,22 +1,36 @@
-import { HttpMethod } from 'simple-http-request-builder';
-import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
-import { networkErrorCatcher } from '../client/FetchClient';
 import {
-  genericError, HttpResponse, networkError, timeoutError,
-} from '../client/HttpResponse';
-import {
+  HttpMethod,
   MultipartHttpClient,
   MultipartHttpOptions,
   MultipartHttpRequest,
-} from './MultipartHttpRequest';
+} from 'simple-http-request-builder';
+import { HttpResponse, networkError, timeoutError } from '../client/HttpResponse';
+import { HttpPromise, unwrapHttpPromise } from '../promise/HttpPromise';
+import { parseHeadersFromRawString } from './RawHeaderParser';
+import { FetchResponseHandler, networkErrorCatcher, processHandlers } from '../handler/FetchResponseHandlers';
+
+export const createResponseFromXhr = (xhr: XMLHttpRequest): Response => {
+  // Extract headers from XMLHttpRequest
+  const headers: Headers = parseHeadersFromRawString(xhr.getAllResponseHeaders());
+
+  // Create the Response body
+  const body = xhr.response;
+
+  // Create the Response object
+  return new Response(body, {
+    status: xhr.status,
+    statusText: xhr.statusText,
+    headers,
+  });
+};
 
 /**
  * Handle multipart request using {@link XMLHttpRequest}
  * @param multipartHttpRequest the request to be executed
  */
-export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<unknown>> = (
+export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<Response>> = (
   multipartHttpRequest: MultipartHttpRequest<unknown>,
-): Promise<unknown> => {
+): Promise<Response> => {
   const xhr: XMLHttpRequest = new XMLHttpRequest();
 
   // Abort request after configured timeout time
@@ -26,7 +40,7 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<unkno
   );
 
   // Return a promise that resolves when the request is complete
-  return new Promise<unknown>((resolve: (value: unknown) => void) => {
+  return new Promise<Response>((resolve: (value: Response) => void, reject: (reason: Error) => void) => {
     xhr.open(multipartHttpRequest.method, multipartHttpRequest.buildUrl(), true);
 
     // Set credentials
@@ -40,25 +54,20 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<unkno
     }
 
     // Handle response
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        return resolve({ response: JSON.parse(xhr.response) });
-      }
-      return resolve({ error: JSON.parse(xhr.response) ?? genericError });
-    };
+    xhr.onload = () => resolve(createResponseFromXhr(xhr));
 
     // Handle network errors
-    xhr.onerror = () => resolve({ error: networkError });
+    xhr.onerror = () => reject(new Error(networkError.errorCode));
 
     // Handle request timeout
-    xhr.ontimeout = () => resolve({ error: timeoutError });
+    xhr.ontimeout = () => reject(new Error(timeoutError.errorCode));
 
     // Handle progress
     xhr.upload.onprogress = (event: ProgressEvent) => {
       multipartHttpRequest.optionValues.onProgressCallback(event);
     };
 
-    xhr.upload.onerror = () => resolve({ error: genericError });
+    xhr.upload.onerror = () => reject(new Error(networkError.errorCode));
 
     // Send the request
     xhr.send(multipartHttpRequest.formData);
@@ -72,7 +81,9 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<unkno
  */
 export const multipartHttpFetchClient = <T = void>(
   httpRequest: MultipartHttpRequest<unknown>,
+  ...handlers: FetchResponseHandler[]
 ): Promise<HttpResponse<T>> => <Promise<HttpResponse<T>>>multipartHttpFetchClientExecutor(httpRequest)
+  .then((response: Response) => processHandlers(response, handlers))
   .catch(networkErrorCatcher);
 
 export type MultipartHttpFetchClient = <T>(

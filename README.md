@@ -118,7 +118,7 @@ So a handler can:
 Expected results should be of type `Promise` of [HttpResponse](#httpresponse).
 
 Here are two samples usage:
-- A handler that validate the HTTP status code: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/client/FetchStatusValidators.ts>
+- A handler that validate the HTTP status code: <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/handler/ValidateBasicStatusCodeHandler.ts>
 - A handler that return a JSON results (the function is named `toJsonResponse`): <https://github.com/Coreoz/simple-http-rest-client/tree/master/src/lib/client/JsonFetchClient.ts>
 
 ### HttpPromise
@@ -167,7 +167,7 @@ The goal here is to verify that the result is excepted and correct.
 By default, these validators are provided:
 - **validateBasicStatusCodes**: It raises an error if the status code is 403, and it returns an empty response if the status code is 200
 - **jsonContentTypeValidator**: It verifies the response content-type is JSON
-- **contentTypeValidator**: It is used to create response content-type validator like `jsonContentTypeValidator`
+- **validateContentType**: It is used to create response content-type validator like `jsonContentTypeValidator`
 
 Once validators are added, our API client should look like this:
 ```typescript

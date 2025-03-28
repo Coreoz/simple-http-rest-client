@@ -1,0 +1,13 @@
+Changelog
+-------------
+- Creation of a [Multipart HTTP client](src/lib/multipart/MultipartHttpClient.ts)
+  - Creation of a [OctetStreamType Validator](src/lib/client/FileFetchClient.ts) to handle octet stream responses 
+  - Creation of a [Raw Header Parser](src/lib/multipart/RawHeaderParser.ts) ot read headers from a xmlhttp response
+  - The use of the MultiPartHttpClient is demonstrated in the [README.md](README.md#upload-file) file
+- Moving generic Reponse Handlers to a [specific package](src/lib/handler) 
+  - [ResponseArrayBufferHandler](src/lib/handler/ResponseArrayBufferHandler.ts)
+  - [ResponseJsonHandler](src/lib/handler/ResponseJsonHandler.ts)
+  - [ResponseTextHandler](src/lib/handler/ResponseTextHandler.ts)
+- Moving generic Reponse Validators to a [specific package](src/lib/handler)
+  - [ValidateBasicStatusCodeHandler.ts](src/lib/handler/ValidateBasicStatusCodeHandler.ts)
+  - [ValidateContentTypeHandler.ts](src/lib/handler/ValidateContentTypeHandler.ts)

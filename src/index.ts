@@ -1,18 +1,40 @@
-// content type validator
-export { contentTypeValidator } from './lib/client/ContentTypeValidator';
-// fetch client
+// clients
 export {
   fetchClientExecutor,
-  networkErrorCatcher,
   fetchClient,
   createHttpFetchRequest,
 } from './lib/client/FetchClient';
 export type {
-  FetchResponseHandler,
   HttpFetchClient,
 } from './lib/client/FetchClient';
-// fetch status validators
-export { validateBasicStatusCodes } from './lib/client/FetchStatusValidators';
+export {
+  multipartHttpFetchClient,
+  multipartHttpFetchClientExecutor,
+  createMultipartHttpFetchRequest,
+} from './lib/multipart/MultipartHttpClient';
+export type {
+  MultipartHttpFetchClient,
+} from './lib/multipart/MultipartHttpClient';
+// handlers
+export {
+  validateBasicStatusCodes,
+} from './lib/handler/ValidateBasicStatusCodeHandler';
+export { validateContentType } from './lib/handler/ValidateContentTypeHandler';
+export {
+  toJsonResponse, defaultJsonErrorMapper,
+} from './lib/handler/ResponseJsonHandler';
+export type {
+  JsonErrorMapper,
+} from './lib/handler/ResponseJsonHandler';
+export { toTextResponse } from './lib/handler/ResponseTextHandler';
+export { toArrayBufferResponse } from './lib/handler/ResponseArrayBufferHandler';
+export {
+  processHandlers,
+  networkErrorCatcher,
+} from './lib/handler/FetchResponseHandlers';
+export type {
+  FetchResponseHandler,
+} from './lib/handler/FetchResponseHandlers';
 // http response
 export type {
   HttpError,
@@ -27,16 +49,15 @@ export {
   timeoutError,
   forbiddenError,
 } from './lib/client/HttpResponse';
-// json fetch client
+// custom fetch clients
 export {
   jsonContentTypeValidator,
-  defaultJsonErrorMapper,
-  toJsonResponse,
   defaultJsonFetchClient,
 } from './lib/client/JsonFetchClient';
-export type {
-  JsonErrorMapper,
-} from './lib/client/JsonFetchClient';
+export {
+  octetStreamTypeValidator,
+  fileFetchClient,
+} from './lib/client/FileFetchClient';
 // http promise
 export {
   processHttpResponse,
@@ -52,3 +73,6 @@ export { PromiseMonitor } from './lib/promise/PromiseMonitor';
 export { HttpPromiseMonitor } from './lib/promise/HttpPromiseMonitor';
 // synchronized http promise
 export { SynchronizedHttpPromise } from './lib/promise/SynchronizedHttpPromise';
+
+// TODO to remove in the next future major release 3.x.x
+export { validateContentType as contentTypeValidator } from './lib/handler/ValidateContentTypeHandler';
