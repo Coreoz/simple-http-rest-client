@@ -61,6 +61,7 @@ function safeThen<P, R>(thenFunction: PromiseFunction<P, R>, debugContext?: obje
     } catch (error) {
       if (isHttpError(error)) {
         // If the then function has thrown a HttpError object, we assume this is legitimate
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         throw error;
       }
       logger.error('Error applying then function', { debugContext, parameter, error });
@@ -80,6 +81,7 @@ function safeCatch<R>(catchFunction: PromiseFunction<HttpError, R>, debugContext
       } catch (error) {
         if (isHttpError(error)) {
           // If the catch function has thrown a HttpError object, we assume this is legitimate
+          // eslint-disable-next-line @typescript-eslint/no-throw-literal
           throw error;
         }
         logger.error('Error applying catch function', { debugContext, httpError, error });
