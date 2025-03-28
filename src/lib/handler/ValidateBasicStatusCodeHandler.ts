@@ -1,6 +1,6 @@
 import { Logger } from 'simple-logging-system';
 import { forbiddenError, HttpResponse, toErrorResponsePromise } from '../client/HttpResponse';
-import { FetchResponseHandler } from '../client/FetchClient';
+import { FetchResponseHandler } from './FetchResponseHandlers';
 
 const logger = new Logger('ValidateBasicStatusValidator');
 
