@@ -1,7 +1,8 @@
 import { HttpRequest } from 'simple-http-request-builder';
+import { FetchResponseHandler } from '../handler/FetchResponseHandlers';
 import { toJsonResponse } from '../handler/ResponseJsonHandler';
 import { validateContentType } from '../handler/ValidateContentTypeHandler';
-import { fetchClient, FetchResponseHandler } from './FetchClient';
+import { fetchClient } from './FetchClient';
 import { validateBasicStatusCodes } from '../handler/ValidateBasicStatusCodeHandler';
 import { HttpResponse } from './HttpResponse';
 
