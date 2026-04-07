@@ -1,5 +1,6 @@
 import { Logger } from 'simple-logging-system';
 import { genericError, toErrorResponsePromise } from '../client/HttpResponse';
+import { FetchResponseHandler } from './FetchResponseHandlers';
 
 const logger = new Logger('ValidateContentTypeHandler');
 
@@ -14,7 +15,6 @@ const logger = new Logger('ValidateContentTypeHandler');
  * Note that the `jsonContentType` can be a partial type. For example if `searchContentType = 'json'`,
  * then a response with the header `application/vnd.myapp.type.v1+json` will be valid.
  */
-// eslint-disable-next-line import/prefer-default-export
 export const validateContentType = (
   response: Response,
   searchContentType: string,
@@ -28,3 +28,15 @@ export const validateContentType = (
 
   return undefined;
 };
+
+/**
+ * A {@link FetchResponseHandler} that verify that the content type of a {@link Response} is JSON
+ * using the `content-type` response HTTP header.
+ *
+ * See {@link validateContentType} for the content type validation.
+ *
+ * @param response The {@link Response} to validate
+ */
+export const jsonContentTypeValidator: FetchResponseHandler = (
+  response: Response,
+) => validateContentType(response, 'json');
