@@ -15,6 +15,9 @@ export {
 export type {
   MultipartHttpFetchClient,
 } from './lib/multipart/MultipartHttpClient';
+export {
+  defaultJsonMultipartFetchClient,
+} from './lib/multipart/JsonMultipartHttpClient';
 // handlers
 export {
   validateBasicStatusCodes,
@@ -51,7 +54,6 @@ export {
 } from './lib/client/HttpResponse';
 // custom fetch clients
 export {
-  jsonContentTypeValidator,
   defaultJsonFetchClient,
 } from './lib/client/JsonFetchClient';
 export {
@@ -76,3 +78,4 @@ export { SynchronizedHttpPromise } from './lib/promise/SynchronizedHttpPromise';
 
 // TODO to remove in the next future major release 3.x.x
 export { validateContentType as contentTypeValidator } from './lib/handler/ValidateContentTypeHandler';
+export { jsonContentTypeValidator } from './lib/handler/ValidateContentTypeHandler';

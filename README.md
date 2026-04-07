@@ -322,7 +322,7 @@ You can use `createMultipartHttpFetchRequest` to upload a file or a list of file
 export default class ApiHttpClient {
     // ...
     multipartRequest<T>(method: HttpMethod, path: string): MultipartHttpRequest<HttpPromise<T>> {
-      return createMultipartHttpFetchRequest<T>(baseUrl, method, path, multipartHttpFetchClient);
+      return createMultipartHttpFetchRequest<T>(baseUrl, method, path, defaultJsonMultipartFetchClient);
     }
 }
 ```

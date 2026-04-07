@@ -1,22 +1,9 @@
 import { HttpRequest } from 'simple-http-request-builder';
-import { FetchResponseHandler } from '../handler/FetchResponseHandlers';
 import { toJsonResponse } from '../handler/ResponseJsonHandler';
-import { validateContentType } from '../handler/ValidateContentTypeHandler';
-import { fetchClient } from './FetchClient';
 import { validateBasicStatusCodes } from '../handler/ValidateBasicStatusCodeHandler';
+import { jsonContentTypeValidator } from '../handler/ValidateContentTypeHandler';
+import { fetchClient } from './FetchClient';
 import { HttpResponse } from './HttpResponse';
-
-/**
- * A {@link FetchResponseHandler} that verify that the content type of a {@link Response} is JSON
- * using the `content-type` response HTTP header.
- *
- * See {@link validateContentType} for the content type validation.
- *
- * @param response The {@link Response} to validate
- */
-export const jsonContentTypeValidator: FetchResponseHandler = (
-  response: Response,
-) => validateContentType(response, 'json');
 
 /**
  * A {@link HttpClient} that executes an {@link HttpRequest} that returns JSON responses.
@@ -25,6 +12,7 @@ export const jsonContentTypeValidator: FetchResponseHandler = (
  * 2. {@link jsonContentTypeValidator}
  * 3. {@link toJsonResponse}
  */
+// eslint-disable-next-line import/prefer-default-export
 export const defaultJsonFetchClient = <T>(httpRequest: HttpRequest<unknown>)
   : Promise<HttpResponse<T>> => fetchClient(
     httpRequest, validateBasicStatusCodes, jsonContentTypeValidator, toJsonResponse,
