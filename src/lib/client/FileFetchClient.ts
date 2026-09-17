@@ -1,4 +1,4 @@
-import { HttpRequest, HttpClient } from 'simple-http-request-builder';
+import { HttpRequest } from 'simple-http-request-builder';
 import { FetchResponseHandler } from '../handler/FetchResponseHandlers';
 import { toArrayBufferResponse } from '../handler/ResponseArrayBufferHandler';
 import {
