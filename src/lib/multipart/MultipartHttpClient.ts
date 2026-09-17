@@ -10,6 +10,11 @@ import { parseHeadersFromRawString } from './RawHeaderParser';
 import { FetchResponseHandler, networkErrorCatcher, processHandlers } from '../handler/FetchResponseHandlers';
 
 export const createResponseFromXhr = (xhr: XMLHttpRequest): Response => {
+  // The status is 0 when the request failed (network error, timeout, abort or CORS)
+  if (xhr.status === 0) {
+    throw new Error(networkError.errorCode);
+  }
+
   // Extract headers from XMLHttpRequest
   const headers: Headers = parseHeadersFromRawString(xhr.getAllResponseHeaders());
 
@@ -32,12 +37,22 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<Respo
   multipartHttpRequest: MultipartHttpRequest<unknown>,
 ): Promise<Response> => {
   const xhr: XMLHttpRequest = new XMLHttpRequest();
+  const abortController: AbortController = new AbortController();
+  let timedOut: boolean = false;
 
-  // Abort request after configured timeout time
-  const timeoutHandle: ReturnType<typeof setTimeout> = setTimeout(
-    () => xhr.abort(),
-    multipartHttpRequest.optionValues.timeoutInMillis,
-  );
+  // Abort the underlying XHR whenever the AbortController is aborted (timeout or cancellation)
+  const abortHandler = () => xhr.abort();
+  abortController.signal.addEventListener('abort', abortHandler);
+
+  // Abort request after the configured timeout time.
+  // A guard is required so that an absent timeout does not abort the request immediately.
+  const { timeoutInMillis } = multipartHttpRequest.optionValues;
+  const timeoutHandle: ReturnType<typeof setTimeout> | undefined = timeoutInMillis !== undefined && timeoutInMillis > 0
+    ? setTimeout(() => {
+      timedOut = true;
+      abortController.abort();
+    }, timeoutInMillis)
+    : undefined;
 
   // Return a promise that resolves when the request is complete
   return new Promise<Response>((resolve: (value: Response) => void, reject: (reason: Error) => void) => {
@@ -49,15 +64,18 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<Respo
     // Set headers
     if (multipartHttpRequest.headersValue) {
       for (const [key, value] of Object.entries(multipartHttpRequest.headersValue)) {
-        xhr.setRequestHeader(key, value);
+        xhr.setRequestHeader(key, value as string);
       }
     }
 
     // Handle response
     xhr.onload = () => resolve(createResponseFromXhr(xhr));
 
-    // Handle network errors
-    xhr.onerror = () => reject(new Error(networkError.errorCode));
+    // Handle network errors and timeouts.
+    // xhr.abort() triggered by the timeout triggers onerror/onabort (not ontimeout),
+    // so the timedOut flag is required to distinguish a timeout from a network error.
+    xhr.onerror = () => reject(new Error(timedOut ? timeoutError.errorCode : networkError.errorCode));
+    xhr.onabort = () => reject(new Error(timedOut ? timeoutError.errorCode : networkError.errorCode));
 
     // Handle request timeout
     xhr.ontimeout = () => reject(new Error(timeoutError.errorCode));
@@ -72,7 +90,10 @@ export const multipartHttpFetchClientExecutor: MultipartHttpClient<Promise<Respo
     // Send the request
     xhr.send(multipartHttpRequest.formData);
   })
-    .finally(() => clearTimeout(timeoutHandle));
+    .finally(() => {
+      clearTimeout(timeoutHandle);
+      abortController.signal.removeEventListener('abort', abortHandler);
+    });
 };
 
 /**
