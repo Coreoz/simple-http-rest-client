@@ -12,7 +12,6 @@ import { HttpPromise, unwrapHttpPromise } from '../lib/promise/HttpPromise';
 import ApiHttpClient from './ApiHttpClient';
 
 const waitTimeout = (durationInMillis: number) => new Promise(
-  // eslint-disable-next-line no-promise-executor-return
   (resolve) => setTimeout(resolve, durationInMillis),
 );
 
@@ -159,7 +158,7 @@ describe('Tests fetch client', () => {
     expect(result.errorCode).toEqual('INTERNAL_ERROR');
   });
 
-  test('Check return type of catch function must be unwrap in the next then call', async () => {
+  test('Check again return type of catch function must be unwrap in the next then call', async () => {
     const mockFirstUser: MockUser = { id: 1 };
 
     const httpClientWithErrorHandler = (

@@ -4,7 +4,6 @@
  * More info at : https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders
  * @param rawHeaders the raw string with the headers
  */
-// eslint-disable-next-line import/prefer-default-export
 export const parseHeadersFromRawString = (rawHeaders: string): Headers => {
   const headers: Headers = new Headers();
   rawHeaders.trim().split(/[\r\n]+/).forEach((line: string) => {
@@ -19,3 +18,4 @@ export const parseHeadersFromRawString = (rawHeaders: string): Headers => {
   });
   return headers;
 };
+

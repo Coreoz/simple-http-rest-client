@@ -1,8 +1,8 @@
-// eslint-disable-next-line max-classes-per-file
 import { MultipartHttpRequest } from 'simple-http-request-builder';
+import type { Mocked, MockedClass } from 'vitest';
 import { createResponseFromXhr, multipartHttpFetchClientExecutor } from '../../lib/multipart/MultipartHttpClient';
 
-jest.mock('../../lib/client/HttpResponse', () => ({
+vi.mock('../../lib/client/HttpResponse', () => ({
   networkError: { errorCode: 'NETWORK_ERROR' },
   timeoutError: { errorCode: 'TIMEOUT_ERROR' },
 }));
@@ -10,7 +10,7 @@ jest.mock('../../lib/client/HttpResponse', () => ({
 describe('createResponseFromXhr', () => {
   test('creates a Response object from an XMLHttpRequest', () => {
     const mockXhr = {
-      getAllResponseHeaders: jest.fn().mockReturnValue('Content-Type: application/json'),
+      getAllResponseHeaders: vi.fn().mockReturnValue('Content-Type: application/json'),
       response: '{\'message\':\'success\'}',
       status: 200,
       statusText: 'OK',
@@ -25,7 +25,7 @@ describe('createResponseFromXhr', () => {
 
   test('throws a network error when the request failed (status 0)', () => {
     const mockXhr = {
-      getAllResponseHeaders: jest.fn().mockReturnValue(''),
+      getAllResponseHeaders: vi.fn().mockReturnValue(''),
       response: '',
       status: 0,
       statusText: '',
@@ -36,14 +36,14 @@ describe('createResponseFromXhr', () => {
 });
 
 describe('multipartHttpFetchClientExecutor', () => {
-  let mockXhr: jest.Mocked<XMLHttpRequest>;
+  let mockXhr: Mocked<XMLHttpRequest>;
   let mockRequest: MultipartHttpRequest<unknown>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     global.FormData = class {
-      append = jest.fn();
+      append = vi.fn();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any; // Mock FormData to avoid ReferenceError
 
@@ -57,10 +57,10 @@ describe('multipartHttpFetchClientExecutor', () => {
     } as any;
 
     mockXhr = {
-      open: jest.fn(),
-      setRequestHeader: jest.fn(),
-      send: jest.fn(),
-      abort: jest.fn(() => { mockXhr.onabort?.(new ProgressEvent('abort')); }),
+      open: vi.fn(),
+      setRequestHeader: vi.fn(),
+      send: vi.fn(),
+      abort: vi.fn(() => { mockXhr.onabort?.(new ProgressEvent('abort')); }),
       withCredentials: false,
       onload: null,
       onerror: null,
@@ -74,21 +74,21 @@ describe('multipartHttpFetchClientExecutor', () => {
           // Placeholder function to prevent `this` binding issues
         },
       } as unknown as XMLHttpRequestUpload,
-      getAllResponseHeaders: jest.fn().mockReturnValue('Content-Type: application/json'),
+      getAllResponseHeaders: vi.fn().mockReturnValue('Content-Type: application/json'),
       response: '{\'message\':\'success\'}',
       status: 200,
       statusText: 'OK',
-    } as unknown as jest.Mocked<XMLHttpRequest>;
+    } as unknown as Mocked<XMLHttpRequest>;
 
-    global.XMLHttpRequest = jest.fn(() => mockXhr) as unknown as jest.MockedClass<typeof XMLHttpRequest>;
+    global.XMLHttpRequest = vi.fn(function () { return mockXhr; }) as unknown as MockedClass<typeof XMLHttpRequest>;
 
     mockRequest = {
       method: 'POST',
-      buildUrl: jest.fn().mockReturnValue('https://api.example.com/upload'),
+      buildUrl: vi.fn().mockReturnValue('https://api.example.com/upload'),
       optionValues: {
         timeoutInMillis: 5000,
         withCredentials: true,
-        onProgressCallback: jest.fn(),
+        onProgressCallback: vi.fn(),
       },
       headersValue: { 'Content-Type': 'multipart/form-data' },
       formData: new FormData(),
@@ -96,15 +96,15 @@ describe('multipartHttpFetchClientExecutor', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   test('sends an XMLHttpRequest and resolves with a Response', async () => {
     const promise = multipartHttpFetchClientExecutor(mockRequest);
     mockXhr.onload?.({} as ProgressEvent);
 
-    jest.runAllTimers(); // Simulate timeout clearing
+    vi.runAllTimers(); // Simulate timeout clearing
 
     const response = await promise;
     expect(response.status).toBe(200);
@@ -131,7 +131,7 @@ describe('multipartHttpFetchClientExecutor', () => {
   test('rejects with TIMEOUT_ERROR when the timeout aborts the request', async () => {
     const promise = multipartHttpFetchClientExecutor(mockRequest);
 
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     await expect(promise).rejects.toThrow('TIMEOUT_ERROR');
     expect(mockXhr.abort).toHaveBeenCalled();
@@ -162,7 +162,7 @@ describe('multipartHttpFetchClientExecutor', () => {
   });
 
   test('clears timeout when request completes', async () => {
-    const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+    const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
 
     const promise = multipartHttpFetchClientExecutor(mockRequest);
     mockXhr.onload?.({} as ProgressEvent);

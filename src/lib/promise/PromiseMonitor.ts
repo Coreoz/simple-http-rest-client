@@ -12,7 +12,6 @@ type MonitoredObject = {
  * - And when all promises have revolved,
  * it is guessable that all the data are ready for the application to rerender again
  */
-// eslint-disable-next-line import/prefer-default-export
 export class PromiseMonitor {
   private readonly runningPromises: Map<Promise<unknown>, MonitoredObject>;
 
@@ -41,3 +40,4 @@ export class PromiseMonitor {
     return this.runningPromises.size;
   }
 }
+

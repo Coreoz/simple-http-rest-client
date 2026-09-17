@@ -4,7 +4,6 @@ import { HttpPromise } from './HttpPromise';
  * Use a {@link HttpPromise} loader to make sure there is only one execution at a time.
  * See {@link SynchronizedHttpPromise.load}.
  */
-// eslint-disable-next-line import/prefer-default-export
 export class SynchronizedHttpPromise<T> {
   private loadingPromise?: Promise<T>;
 
@@ -26,7 +25,6 @@ export class SynchronizedHttpPromise<T> {
         })
         .catch((error) => {
           this.clearLoading();
-          // eslint-disable-next-line @typescript-eslint/no-throw-literal
           throw error;
         });
       this.loadingPromise = httpPromise.toPromise();
@@ -40,3 +38,4 @@ export class SynchronizedHttpPromise<T> {
     this.loadingContext = undefined;
   }
 }
+

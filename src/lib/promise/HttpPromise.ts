@@ -6,9 +6,7 @@ const logger = new Logger('HttpPromise');
 /**
  * A function that takes a parameter of type `P` and returns a result of type `R`
  */
-export interface PromiseFunction<P, R> {
-  (parameter: P): R;
-}
+export type PromiseFunction<P, R> = (parameter: P) => R;
 
 /**
  * Process a {@link HttpResponse} to throw the {@link HttpResponse.error} if it exists.
@@ -22,13 +20,11 @@ export interface PromiseFunction<P, R> {
 export function processHttpResponse<T>(httpResponse: HttpResponse<T>): T {
   if ('error' in httpResponse) {
     // We actually want to throw an object literal and not and `Error`
-    // eslint-disable-next-line @typescript-eslint/no-throw-literal
     throw httpResponse.error;
   }
   if (httpResponse.response === undefined) {
     logger.error('Weird, the http result is not recognized');
     // We actually want to throw an object literal and not and `Error`
-    // eslint-disable-next-line @typescript-eslint/no-throw-literal
     throw genericError;
   }
   return httpResponse.response;
@@ -61,12 +57,10 @@ function safeThen<P, R>(thenFunction: PromiseFunction<P, R>, debugContext?: obje
     } catch (error) {
       if (isHttpError(error)) {
         // If the then function has thrown a HttpError object, we assume this is legitimate
-        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         throw error;
       }
       logger.error('Error applying then function', { debugContext, parameter, error });
       // We actually want to through an object literal and not and `Error`
-      // eslint-disable-next-line @typescript-eslint/no-throw-literal
       throw genericError;
     }
   };
@@ -81,18 +75,15 @@ function safeCatch<R>(catchFunction: PromiseFunction<HttpError, R>, debugContext
       } catch (error) {
         if (isHttpError(error)) {
           // If the catch function has thrown a HttpError object, we assume this is legitimate
-          // eslint-disable-next-line @typescript-eslint/no-throw-literal
           throw error;
         }
         logger.error('Error applying catch function', { debugContext, httpError, error });
         // We actually want to through an object literal and not and `Error`
-        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         throw genericError;
       }
     }
     logger.error('Error thrown is not an httpError', { debugContext, httpError });
     // We actually want to through an object literal and not and `Error`
-    // eslint-disable-next-line @typescript-eslint/no-throw-literal
     throw genericError;
   };
 }
@@ -207,3 +198,4 @@ export class HttpPromise<T> {
     return this.debugContext;
   }
 }
+

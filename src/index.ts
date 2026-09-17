@@ -19,6 +19,12 @@ export type {
 export {
   validateBasicStatusCodes,
 } from './lib/handler/ValidateBasicStatusCodeHandler';
+export {
+  validateStatusCodes,
+} from './lib/handler/ValidateStatusCodesHandler';
+export type {
+  StatusErrorMap,
+} from './lib/handler/ValidateStatusCodesHandler';
 export { validateContentType } from './lib/handler/ValidateContentTypeHandler';
 export {
   toJsonResponse, defaultJsonErrorMapper,
@@ -26,7 +32,12 @@ export {
 export type {
   JsonErrorMapper,
 } from './lib/handler/ResponseJsonHandler';
-export { toTextResponse } from './lib/handler/ResponseTextHandler';
+export {
+  toTextResponse, toErrorTextResponse, defaultTextErrorMapper,
+} from './lib/handler/ResponseTextHandler';
+export type {
+  TextErrorMapper,
+} from './lib/handler/ResponseTextHandler';
 export { toArrayBufferResponse } from './lib/handler/ResponseArrayBufferHandler';
 export {
   processHandlers,

@@ -1,4 +1,4 @@
-import { HttpRequest } from 'simple-http-request-builder';
+import { HttpRequest, HttpClient } from 'simple-http-request-builder';
 import { FetchResponseHandler } from '../handler/FetchResponseHandlers';
 import { toArrayBufferResponse } from '../handler/ResponseArrayBufferHandler';
 import {
@@ -23,10 +23,10 @@ export const octetStreamTypeValidator: FetchResponseHandler = (response: Respons
  * 2. {@link octetStreamTypeValidator}
  * 3. {@link toArrayBufferResponse}
  */
-// eslint-disable-next-line import/prefer-default-export
 export const fileFetchClient = (httpRequest: HttpRequest<unknown>): Promise<HttpResponse<ArrayBuffer>> => fetchClient(
   httpRequest,
   validateBasicStatusCodes,
   octetStreamTypeValidator,
   toArrayBufferResponse,
 );
+
