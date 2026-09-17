@@ -22,6 +22,17 @@ describe('createResponseFromXhr', () => {
     expect(response.statusText).toBe('OK');
     expect(response.headers.get('Content-Type')).toBe('application/json');
   });
+
+  test('throws a network error when the request failed (status 0)', () => {
+    const mockXhr = {
+      getAllResponseHeaders: jest.fn().mockReturnValue(''),
+      response: '',
+      status: 0,
+      statusText: '',
+    } as unknown as XMLHttpRequest;
+
+    expect(() => createResponseFromXhr(mockXhr)).toThrow('NETWORK_ERROR');
+  });
 });
 
 describe('multipartHttpFetchClientExecutor', () => {
@@ -49,10 +60,11 @@ describe('multipartHttpFetchClientExecutor', () => {
       open: jest.fn(),
       setRequestHeader: jest.fn(),
       send: jest.fn(),
-      abort: jest.fn(),
+      abort: jest.fn(() => { mockXhr.onabort?.(new ProgressEvent('abort')); }),
       withCredentials: false,
       onload: null,
       onerror: null,
+      onabort: null,
       ontimeout: null,
       upload: {
         onprogress(this: XMLHttpRequestUpload) {
@@ -114,6 +126,23 @@ describe('multipartHttpFetchClientExecutor', () => {
     mockXhr.ontimeout?.({} as ProgressEvent);
 
     await expect(promise).rejects.toThrow('TIMEOUT_ERROR');
+  });
+
+  test('rejects with TIMEOUT_ERROR when the timeout aborts the request', async () => {
+    const promise = multipartHttpFetchClientExecutor(mockRequest);
+
+    jest.runOnlyPendingTimers();
+
+    await expect(promise).rejects.toThrow('TIMEOUT_ERROR');
+    expect(mockXhr.abort).toHaveBeenCalled();
+  });
+
+  test('rejects with NETWORK_ERROR on abort when not timed out', async () => {
+    const promise = multipartHttpFetchClientExecutor(mockRequest);
+
+    mockXhr.onabort?.({} as ProgressEvent);
+
+    await expect(promise).rejects.toThrow('NETWORK_ERROR');
   });
 
   test('calls onProgressCallback during upload', async () => {
