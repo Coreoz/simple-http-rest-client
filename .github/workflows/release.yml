@@ -64,4 +64,4 @@ jobs:
         run: yarn build
 
       - name: Publish to NPM Staging (Trusted Publisher)
-        run: npm stage publish --access public --provenance
+        run: npm stage publish --access public --provenance --tag ${{ contains(steps.get_version.outputs.version, '-') && 'beta' || 'latest' }}
