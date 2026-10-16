@@ -1,15 +1,23 @@
+import type { Mock } from 'vitest';
+import {
+  beforeEach, describe, expect, test, vi,
+} from 'vitest';
 import { genericError, HttpResponse, toErrorResponsePromise } from '../../lib/client/HttpResponse';
 import { FetchResponseHandler, processHandlers } from '../../lib/handler/FetchResponseHandlers';
 
-jest.mock('../../lib/client/HttpResponse', () => ({
-  toErrorResponsePromise: jest.fn(),
-}));
+vi.mock('../../lib/client/HttpResponse', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../lib/client/HttpResponse')>();
+  return {
+    ...actual,
+    toErrorResponsePromise: vi.fn(),
+  };
+});
 
 describe('handleFetchResponse', () => {
   const mockResponse = new Response(null, { status: 200 });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('returns response when no handlers are provided', async () => {
@@ -19,7 +27,7 @@ describe('handleFetchResponse', () => {
 
   test('returns first handler\'s response when a handler provides a valid response', async () => {
     const expectedResponse: HttpResponse<string> = { response: 'Success' };
-    const mockHandler: FetchResponseHandler = jest.fn().mockResolvedValue(expectedResponse);
+    const mockHandler: FetchResponseHandler = vi.fn().mockResolvedValue(expectedResponse);
 
     const result = await processHandlers(mockResponse, [mockHandler]);
 
@@ -30,8 +38,8 @@ describe('handleFetchResponse', () => {
   test('skips handlers that return undefined', async () => {
     const expectedResponse: HttpResponse<string> = { response: 'Success' };
 
-    const mockHandler1: FetchResponseHandler = jest.fn().mockReturnValue(undefined);
-    const mockHandler2: FetchResponseHandler = jest.fn().mockResolvedValue(expectedResponse);
+    const mockHandler1: FetchResponseHandler = vi.fn().mockReturnValue(undefined);
+    const mockHandler2: FetchResponseHandler = vi.fn().mockResolvedValue(expectedResponse);
 
     const result = await processHandlers(mockResponse, [mockHandler1, mockHandler2]);
 
@@ -42,11 +50,11 @@ describe('handleFetchResponse', () => {
 
   test('returns an error response if a handler throws an error', async () => {
     const error = new Error('Handler failed');
-    const mockHandler: FetchResponseHandler = jest.fn().mockImplementation(() => {
+    const mockHandler: FetchResponseHandler = vi.fn().mockImplementation(() => {
       throw error;
     });
 
-    (toErrorResponsePromise as jest.Mock).mockReturnValue(Promise.resolve({ error: genericError }));
+    (toErrorResponsePromise as Mock).mockReturnValue(Promise.resolve({ error: genericError }));
 
     const result = await processHandlers(mockResponse, [mockHandler]);
 
@@ -57,8 +65,8 @@ describe('handleFetchResponse', () => {
   test('does not call subsequent handlers if a valid response is found', async () => {
     const expectedResponse: HttpResponse<string> = { response: 'Success' };
 
-    const mockHandler1: FetchResponseHandler = jest.fn().mockResolvedValue(expectedResponse);
-    const mockHandler2: FetchResponseHandler = jest.fn();
+    const mockHandler1: FetchResponseHandler = vi.fn().mockResolvedValue(expectedResponse);
+    const mockHandler2: FetchResponseHandler = vi.fn();
 
     const result = await processHandlers(mockResponse, [mockHandler1, mockHandler2]);
 

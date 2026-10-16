@@ -16,10 +16,10 @@
     "build": "yarn tsc:cjs && yarn tsc:esm",
     "tsc:cjs": "tsc --module commonjs --outDir build/cjs -p tsconfig.json",
     "tsc:esm": "tsc --module esnext --outDir build/esm -p tsconfig.json",
-    "clean": "rm -rf build",
+    "clean": "node -e \"require('node:fs').rmSync('build',{recursive:true,force:true})\"",
     "typescript": "tsc --noEmit --outDir build/esm -p tsconfig.json",
     "eslint": "eslint src --ext .ts",
-    "test": "jest --config jest.config.ts",
+    "test": "vitest run",
     "prepare-release": "yarn clean && yarn typescript && yarn eslint && yarn test && yarn build",
     "release": "release-it"
   },
@@ -34,35 +34,32 @@
   "typings": "build/esm/index.d.ts",
   "module": "build/esm/index.js",
   "engines": {
-    "node": ">=10"
+    "node": ">=20"
   },
   "sideEffects": false,
+  "packageManager": "yarn@4.12.0",
   "dependencies": {
     "simple-http-request-builder": "^2.1.0",
     "simple-logging-system": "^1.1.0"
   },
   "devDependencies": {
-    "@jest/types": "^27.5.1",
-    "@types/jest": "^27.4.1",
-    "@types/node": "^20.12.4",
-    "@types/node-fetch": "2",
-    "@typescript-eslint/eslint-plugin": "^5.16.0",
-    "@typescript-eslint/parser": "^5.16.0",
-    "eslint": "^8.12.0",
+    "@stylistic/eslint-plugin": "^4.2.0",
+    "@types/node": "^24.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "@vitest/coverage-v8": "^5.0.1",
+    "eslint": "^9.39.2",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-airbnb-typescript": "^16.1.4",
-    "eslint-plugin-import": "^2.25.4",
-    "jest": "^27.5.1",
-    "jest-config": "^27.5.1",
-    "node-fetch": "2",
-    "release-it": "^15.1.0",
+    "eslint-config-airbnb-typescript": "^18.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "msw": "^2.12.7",
+    "release-it": "^19.2.4",
     "source-map-support": "^0.5.21",
-    "ts-jest": "^27.1.4",
-    "ts-node": "^10.7.0",
-    "typescript": "^4.6.3"
+    "typescript": "^5.9.3",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
   },
   "files": [
     "build/**/*.*"
-  ],
-  "packageManager": "yarn@4.1.1"
+  ]
 }

@@ -1,5 +1,12 @@
+import {
+  delay, http, HttpResponse as MswHttpResponse,
+} from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll, afterEach, beforeAll, beforeEach, describe, expect, test,
+} from 'vitest';
 import { HttpMethod, HttpRequest } from 'simple-http-request-builder';
-import { fetchClient } from '../lib/client/FetchClient';
+import { createHttpFetchRequest, fetchClient } from '../lib/client/FetchClient';
 import {
   genericError,
   HttpError,
@@ -11,38 +18,24 @@ import {
 import { HttpPromise, unwrapHttpPromise } from '../lib/promise/HttpPromise';
 import ApiHttpClient from './ApiHttpClient';
 
-const waitTimeout = (durationInMillis: number) => new Promise(
-  // eslint-disable-next-line no-promise-executor-return
-  (resolve) => setTimeout(resolve, durationInMillis),
+const waitTimeout = (durationInMillis: number) => new Promise((resolve) => setTimeout(resolve, durationInMillis));
+
+let mockedResponseBody: object = {};
+let mockedNetworkError = false;
+
+const server = setupServer(
+  http.get(/.*/, () => {
+    if (mockedNetworkError) {
+      return MswHttpResponse.error();
+    }
+    return MswHttpResponse.json(mockedResponseBody);
+  }),
 );
 
-let mockedFetchResponseBody: string | undefined;
-const mockedFetchResponseStatus: ResponseInit = {
-  status: 200,
-  statusText: 'Ok',
-  // headers
-  headers: {
-    'content-type': 'application/json',
-  },
-};
-let mockedPromiseError: Error | undefined;
-
-const setMockedBody = (responseObject: object) => {
-  mockedFetchResponseBody = JSON.stringify(responseObject);
-};
-
-const mockedFetch = (): Promise<Response> => {
-  if (mockedPromiseError) {
-    return Promise.reject(mockedPromiseError);
-  }
-  return Promise.resolve(new Response(mockedFetchResponseBody, mockedFetchResponseStatus));
-};
-
 type MockUser = { id: number };
-
 const executeGetUserRequest = (mockUser: MockUser): HttpPromise<MockUser> => {
   // Mock body
-  setMockedBody(mockUser);
+  mockedResponseBody = mockUser;
   // Add client
   const apiClient: ApiHttpClient = new ApiHttpClient();
   // Execute request
@@ -52,20 +45,19 @@ const executeGetUserRequest = (mockUser: MockUser): HttpPromise<MockUser> => {
 };
 
 describe('Tests fetch client', () => {
-  const oldFetch = global.fetch;
-  global.fetch = mockedFetch;
+  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+
+  afterEach(() => server.resetHandlers());
+
+  afterAll(() => server.close());
 
   beforeEach(() => {
-    mockedPromiseError = undefined;
-    mockedFetchResponseBody = undefined;
-  });
-
-  afterAll(() => {
-    global.fetch = oldFetch;
+    mockedNetworkError = false;
+    mockedResponseBody = {};
   });
 
   test('Check simple request sample', async () => {
-    setMockedBody({ test: 1 });
+    mockedResponseBody = { test: 1 };
     const response = await new ApiHttpClient()
       .rawRequest(HttpMethod.GET, 'https://hostname/users')
       .execute()
@@ -73,12 +65,12 @@ describe('Tests fetch client', () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toEqual({ test: 1 });
-    // to avoid HttpPromise logging after the end of the jest test
+    // to avoid HttpPromise logging after the end of the test
     await waitTimeout(1);
   });
 
   test('Check network error rejects promise with networkError', async () => {
-    mockedPromiseError = new Error('Mocked error');
+    mockedNetworkError = true;
     const response = new ApiHttpClient()
       .rawRequest(HttpMethod.GET, 'https://hostname/users')
       .execute()
@@ -87,20 +79,28 @@ describe('Tests fetch client', () => {
   });
 
   test('Check timeout error rejects promise with timeoutError', async () => {
-    mockedPromiseError = new Error();
-    mockedPromiseError.name = 'AbortError';
-    const response = new ApiHttpClient()
-      .rawRequest(HttpMethod.GET, 'https://hostname/users')
+    server.use(http.get(/.*/, async () => {
+      await delay(1000);
+      return MswHttpResponse.json({});
+    }));
+    const response = createHttpFetchRequest(
+      'https://hostname/api',
+      HttpMethod.GET,
+      'https://hostname/users',
+      fetchClient,
+      { timeoutInMillis: 10 },
+    )
       .execute()
       .toPromise();
     await expect(response).rejects.toEqual(timeoutError);
-    // to avoid HttpPromise logging after the end of the jest test
+    // to avoid HttpPromise logging after the end of the test
     await waitTimeout(1);
   });
 
   test('Check handler execution error rejects promise with genericError', async () => {
     const httpClientWithErrorHandler = (httpRequest: HttpRequest<unknown>) => unwrapHttpPromise(fetchClient(
-      httpRequest, () => {
+      httpRequest,
+      () => {
         throw new Error();
       },
     ));

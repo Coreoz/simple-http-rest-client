@@ -26,7 +26,6 @@ export class SynchronizedHttpPromise<T> {
         })
         .catch((error) => {
           this.clearLoading();
-          // eslint-disable-next-line @typescript-eslint/no-throw-literal
           throw error;
         });
       this.loadingPromise = httpPromise.toPromise();

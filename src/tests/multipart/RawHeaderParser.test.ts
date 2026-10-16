@@ -1,3 +1,6 @@
+import {
+  describe, expect, test,
+} from 'vitest';
 import { parseHeadersFromRawString } from '../../lib/multipart/RawHeaderParser';
 
 const rawHeaders = 'date: Fri, 08 Dec 2017 21:04:30 GMT\r\n'
