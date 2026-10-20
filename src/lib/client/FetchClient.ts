@@ -13,8 +13,9 @@ import { HttpResponse } from './HttpResponse';
  *
  * @param httpRequest The request to execute
  */
-export const fetchClientExecutor: HttpClient<Promise<Response>> = (httpRequest: HttpRequest<unknown>)
-: Promise<Response> => {
+export const fetchClientExecutor: HttpClient<Promise<Response>> = (
+  httpRequest: HttpRequest<unknown>,
+): Promise<Response> => {
   const timeoutHandle = setTimeout(
     () => httpRequest.optionValues.timeoutAbortController.abort(),
     httpRequest.optionValues.timeoutInMillis,
@@ -49,10 +50,12 @@ export const fetchClientExecutor: HttpClient<Promise<Response>> = (httpRequest: 
  * @param httpRequest The {@link HttpRequest} to execute
  * @param handlers The {@link FetchResponseHandler}s to execute on an OK response (status code = 2xx)
  */
-export const fetchClient = <T = Response>(httpRequest: HttpRequest<unknown>, ...handlers: FetchResponseHandler[])
-  : Promise<HttpResponse<T>> => <Promise<HttpResponse<T>>>fetchClientExecutor(httpRequest)
-    .then((response: Response) => processHandlers(response, handlers))
-    .catch(networkErrorCatcher);
+export const fetchClient = <T = Response>(
+  httpRequest: HttpRequest<unknown>,
+  ...handlers: FetchResponseHandler[]
+): Promise<HttpResponse<T>> => <Promise<HttpResponse<T>>>fetchClientExecutor(httpRequest)
+  .then((response: Response) => processHandlers(response, handlers))
+  .catch(networkErrorCatcher);
 
 /**
  * A {@link HttpClient} that uses {@link HttpRequest} and returns a `Promise<HttpResponse<T>>`.
@@ -81,14 +84,13 @@ export const createHttpFetchRequest = <T>(
   path: string,
   httpClient: HttpFetchClient<T>,
   options?: Partial<HttpOptions>,
-)
-  : HttpRequest<HttpPromise<T>> => new HttpRequest<HttpPromise<T>>(
-    (httpRequest: HttpRequest<unknown>) => new HttpPromise<T>(
-      unwrapHttpPromise(httpClient(httpRequest)),
-      httpRequest,
-    ),
-    baseUrl,
-    method,
-    path,
-    options,
-  );
+): HttpRequest<HttpPromise<T>> => new HttpRequest<HttpPromise<T>>(
+  (httpRequest: HttpRequest<unknown>) => new HttpPromise<T>(
+    unwrapHttpPromise(httpClient(httpRequest)),
+    httpRequest,
+  ),
+  baseUrl,
+  method,
+  path,
+  options,
+);

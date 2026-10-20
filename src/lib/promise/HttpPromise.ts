@@ -7,7 +7,7 @@ const logger = new Logger('HttpPromise');
  * A function that takes a parameter of type `P` and returns a result of type `R`
  */
 export interface PromiseFunction<P, R> {
-  (parameter: P): R;
+  (parameter: P): R,
 }
 
 /**
@@ -68,8 +68,10 @@ function safeThen<P, R>(thenFunction: PromiseFunction<P, R>, debugContext?: obje
   };
 }
 
-function safeCatch<R>(catchFunction: PromiseFunction<HttpError, R>, debugContext?: object)
-  : PromiseFunction<unknown, R> {
+function safeCatch<R>(
+  catchFunction: PromiseFunction<HttpError, R>,
+  debugContext?: object,
+): PromiseFunction<unknown, R> {
   return (httpError: unknown) => {
     if (isHttpError(httpError)) {
       try {
@@ -105,7 +107,7 @@ export class HttpPromise<T> {
   private isCaughtAttached: boolean;
 
   // protected visibility for testing purpose only
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   protected promise: Promise<any>;
 
   constructor(basePromise: Promise<T>, private readonly debugContext?: object) {

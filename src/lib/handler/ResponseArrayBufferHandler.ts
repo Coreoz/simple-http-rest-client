@@ -21,7 +21,7 @@ const logger: Logger = new Logger('ResponseArrayBufferHandler');
  * @param jsonErrorMapper The {@link JsonErrorMapper} that will handle the parsed JSON object in case
  * the HTTP response is not successful (status code is not 2xx)
  */
-// eslint-disable-next-line import/prefer-default-export
+
 export const toArrayBufferResponse = (
   response: Response,
   jsonErrorMapper: JsonErrorMapper = defaultJsonErrorMapper,

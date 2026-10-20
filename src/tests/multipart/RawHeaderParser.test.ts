@@ -4,9 +4,9 @@ import {
 import { parseHeadersFromRawString } from '../../lib/multipart/RawHeaderParser';
 
 const rawHeaders = 'date: Fri, 08 Dec 2017 21:04:30 GMT\r\n'
-   + 'content-encoding: gzip\r\n'
-   + 'content-type: text/html; charset=utf-8\r\n'
-   + 'content-length: 6502\r\n';
+  + 'content-encoding: gzip\r\n'
+  + 'content-type: text/html; charset=utf-8\r\n'
+  + 'content-length: 6502\r\n';
 
 const rawHeadersWithNoSpaces = 'date:Fri, 08 Dec 2017 21:04:30 GMT\r\n'
   + 'content-encoding:gzip\r\n'

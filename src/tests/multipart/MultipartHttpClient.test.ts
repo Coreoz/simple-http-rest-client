@@ -2,7 +2,7 @@ import type { Mocked, MockedClass } from 'vitest';
 import {
   afterEach, beforeEach, describe, expect, test, vi,
 } from 'vitest';
-// eslint-disable-next-line max-classes-per-file
+
 import { MultipartHttpRequest } from 'simple-http-request-builder';
 import { createResponseFromXhr, multipartHttpFetchClientExecutor } from '../../lib/multipart/MultipartHttpClient';
 
@@ -37,7 +37,6 @@ describe('multipartHttpFetchClientExecutor', () => {
 
     global.FormData = class {
       append = vi.fn();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any; // Mock FormData to avoid ReferenceError
 
     global.ProgressEvent = class {
@@ -46,7 +45,6 @@ describe('multipartHttpFetchClientExecutor', () => {
       constructor(type: string, eventInitDict?: ProgressEventInit) {
         Object.assign(this, eventInitDict);
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
     mockXhr = {

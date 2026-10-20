@@ -15,7 +15,7 @@ const logger = new Logger('ResponseJsonHandler');
  * @param json The parsed JSON object
  */
 // any is the returned type of the Fetch.json() Promise
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export type JsonErrorMapper = (response: Response, json: any) => HttpResponse<unknown>;
 
 /**

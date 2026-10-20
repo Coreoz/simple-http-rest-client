@@ -20,13 +20,13 @@ const logger = new Logger('FetchResponseHandlers');
  * Expected results should be of type {@link Promise} of {@link HttpResponse}.
  */
 export interface FetchResponseHandler<T = unknown> {
-  (response: Response): Promise<HttpResponse<T>> | undefined;
+  (response: Response): Promise<HttpResponse<T>> | undefined,
 }
 
 /**
  * If an {@link FetchResponseHandler handler} raises an error, a {@link genericError} will be returned
  */
-// eslint-disable-next-line import/prefer-default-export
+
 export const processHandlers = <T = unknown>(
   response: Response,
   handlers: FetchResponseHandler<T>[],

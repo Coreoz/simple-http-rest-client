@@ -25,7 +25,6 @@ export const jsonContentTypeValidator: FetchResponseHandler = (
  * 2. {@link jsonContentTypeValidator}
  * 3. {@link toJsonResponse}
  */
-export const defaultJsonFetchClient = <T>(httpRequest: HttpRequest<unknown>)
-  : Promise<HttpResponse<T>> => fetchClient(
-    httpRequest, validateBasicStatusCodes, jsonContentTypeValidator, toJsonResponse,
-  );
+export const defaultJsonFetchClient = <T>(httpRequest: HttpRequest<unknown>): Promise<HttpResponse<T>> => fetchClient(
+  httpRequest, validateBasicStatusCodes, jsonContentTypeValidator, toJsonResponse,
+);

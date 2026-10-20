@@ -14,7 +14,7 @@ const logger = new Logger('ValidateContentTypeHandler');
  * Note that the `jsonContentType` can be a partial type. For example if `searchContentType = 'json'`,
  * then a response with the header `application/vnd.myapp.type.v1+json` will be valid.
  */
-// eslint-disable-next-line import/prefer-default-export
+
 export const validateContentType = (
   response: Response,
   searchContentType: string,
